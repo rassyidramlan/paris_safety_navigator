@@ -115,7 +115,8 @@ function assess(point, events) {
 
 function inParis(ev) {
   const near = nearestStop(ev, PARIS);
-  return !near || near.d <= PARIS_RADIUS;   // no coordinates (e.g. a whole line): keep
+  if (!near) return (ev.modes || []).some((m) => m !== "Bus");   // whole Métro/RER line: keep; unplaced bus: drop
+  return near.d <= PARIS_RADIUS;
 }
 
 function worst(levels) { return levels.reduce((a, b) => (LEVELS.indexOf(b) > LEVELS.indexOf(a) ? b : a), "green"); }
@@ -182,9 +183,10 @@ function renderPlaque() {
 let map, layerGroups = {};
 function initMap() {
   map = L.map("map", { zoomControl: false, preferCanvas: true, attributionControl: true }).setView([48.8566, 2.3522], 13);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    maxZoom: 19, subdomains: "abcd",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  // OpenStreetMap's standard tiles (free, no key). Darkened with a CSS filter on the tile pane.
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19, className: "dark-tiles",
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
   map.attributionControl.setPosition("topright");
   for (const k of ["road", "works", "disruption", "strike", "demo", "places"]) layerGroups[k] = L.layerGroup().addTo(map);
@@ -325,7 +327,8 @@ function showDetail(ev) {
     <p class="kv"><b>${esc(timing(ev))}</b>${ev.end && ev.status !== "active" ? ` · until ${esc(fmtTime(ev.end))}` : ""}</p>
     ${near ? `<p class="kv">Distance: <b>${near}</b></p>` : ""}
     ${stops ? `<p class="kv">Stops: ${esc(stops)}</p>` : ""}
-    ${ev.text ? `<div class="detail-text">${esc(ev.text)}</div>` : ""}
+    ${ev.why ? `<p class="kv">Flagged because the operator wrote <b>“${esc(ev.why)}”</b></p>` : ""}
+    ${ev.text ? `<div class="detail-text"${ev.lang === "fr" ? ' lang="fr"' : ""}>${esc(ev.text)}</div>` : ""}
     <p class="kv">${ev.updated ? `Notice updated ${esc(fmtTime(ev.updated))} · ` : ""}All times Paris time</p>
     <div class="row"><button class="btn" id="detail-map">Show on map</button>${ev.url ? `<a class="btn" style="text-align:center;text-decoration:none" href="${esc(ev.url)}" target="_blank" rel="noopener">Official source</a>` : ""}</div>`;
   $("#detail").hidden = false;

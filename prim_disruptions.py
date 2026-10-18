@@ -52,13 +52,20 @@ DEMO_PATTERN = re.compile(r"\b(?i:demonstrations?|protests?|rall(?:y|ies))\b|\b(
 STRIKE_PATTERN = re.compile(r"\b(?i:strikes?|social movements?|industrial action)\b|\b(?:grèves?|greves?|mouvements? sociaux|mouvement social|préavis)\b")
 
 
+def protest_match(text):
+    """(kind, matched word): kind is 'demonstration', 'strike' or None."""
+    m = DEMO_PATTERN.search(text)
+    if m:
+        return "demonstration", m.group(0)
+    m = STRIKE_PATTERN.search(text)
+    if m:
+        return "strike", m.group(0)
+    return None, None
+
+
 def protest_kind(text):
     """'demonstration', 'strike' or None for an operator message."""
-    if DEMO_PATTERN.search(text):
-        return "demonstration"
-    if STRIKE_PATTERN.search(text):
-        return "strike"
-    return None
+    return protest_match(text)[0]
 
 
 # Kept for compatibility: matches either kind.
@@ -160,8 +167,9 @@ def normalise(disruption, impacted, now):
         "stops": impacted.get("stops", [])[:20],
         "stop_refs": impacted.get("stop_refs", [])[:40],
         "modes": sorted({m for m, _ in lines if m}),
-        "protest_kind": protest_kind(title + " " + message),
-        "protest_related": protest_kind(title + " " + message) is not None,
+        "protest_kind": protest_match(title + " " + message)[0],
+        "protest_word": protest_match(title + " " + message)[1],
+        "protest_related": protest_match(title + " " + message)[0] is not None,
         "points": [],
         "lat": None,
         "lon": None,
@@ -186,7 +194,8 @@ def fetch(api_key, now):
         raise ValueError("PRIM_API_KEY is not configured")
     response = requests.get(
         URL,
-        headers={"apiKey": api_key, "Accept": "application/json"},
+        # Ask for English; operators who only publish in French still come back in French.
+        headers={"apiKey": api_key, "Accept": "application/json", "Accept-Language": "en"},
         timeout=TIMEOUT_SECONDS,
     )
     if response.status_code in (401, 403):
