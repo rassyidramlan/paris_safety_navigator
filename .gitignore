@@ -6,3 +6,4 @@ data/*
 !data/sent_hashes.json
 !data/idfm_stops.json
 site/data.json
+.cache/

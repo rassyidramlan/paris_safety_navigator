@@ -118,7 +118,8 @@ def road_events(raw, now):
             "pts": [[round(a, 5), round(b, 5)] for a, b in e.get("points", [])],
             "status": e["status"], "start": iso(e["start"]), "end": iso(e["end"]),
             "updated": None, "sev": None, "src": "Paris Open Data", "url": e["url"],
-            "lt": e.get("long_term", False),
+            "lt": e.get("long_term", False), "why": None,
+            "lang": guess_lang(e["description"]),
         })
     return out
 
@@ -157,8 +158,12 @@ def collect(now=None, api_key=None, locator=None, config=None):
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default=str(ROOT / "site" / "data.json"))
+    parser.add_argument("--no-translate", action="store_true", help="skip French->English translation")
     args = parser.parse_args(argv)
     result = collect()
+    if not args.no_translate:
+        import translate
+        print(translate.translate_events(result["events"]))
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(result, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     for s in result["sources"]:
