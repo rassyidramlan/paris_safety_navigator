@@ -54,6 +54,16 @@ class StopLocator:
         return self.arr.get(key) or self.zda.get(key)
 
 
+FRENCH_HINTS = (" le ", " la ", " les ", " des ", " du ", " à ", " pour ", " arrêt", " ligne", " travaux",
+                " jusqu", " desservi", " en raison", " perturb", " à partir")
+
+
+def guess_lang(text):
+    """'fr' when the text reads as French, else 'en'. Cheap heuristic, good enough to label."""
+    t = f" {text.lower()} "
+    return "fr" if sum(h in t for h in FRENCH_HINTS) >= 2 else "en"
+
+
 def category(event):
     if event.get("protest_kind") == "demonstration":
         return "demo"
@@ -89,6 +99,8 @@ def transport_events(raw, locator, now):
             "status": e["status"], "start": iso(e["start"]), "end": iso(e["end"]),
             "updated": iso(e.get("updated")), "sev": e.get("severity"),
             "src": "IDFM official", "url": e["url"], "lt": e.get("long_term", False),
+            "why": e.get("protest_word"),
+            "lang": guess_lang(e["title"] + " " + e["description"]),
         })
     return out
 
@@ -151,6 +163,10 @@ def main(argv=None):
     Path(args.out).write_text(json.dumps(result, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     for s in result["sources"]:
         print(f"{s['id']}: ok={s['ok']} count={s['count']} error={s['error']}")
+    transport = [e for e in result["events"] if e["kind"] == "transport"]
+    if transport:
+        fr = sum(e.get("lang") == "fr" for e in transport)
+        print(f"transport notices in French: {fr} of {len(transport)}")
     print(f"wrote {len(result['events'])} events to {args.out}")
     # Fail the run only if every source failed, so the old data stays deployed.
     return 0 if any(s["ok"] for s in result["sources"]) else 1

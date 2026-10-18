@@ -159,3 +159,4 @@ a.btn { color: var(--text); }
 .pin { background: var(--plaque-white); color: var(--enamel); border: 3px solid var(--enamel); border-radius: 6px;
   font: 600 14px/1 var(--display); padding: 4px 6px; white-space: nowrap; box-shadow: 0 0 0 2px var(--plaque-white); }
 .me { width: 16px; height: 16px; border-radius: 50%; background: #4c8dff; border: 3px solid #fff; }
+.dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6); }

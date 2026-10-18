@@ -1,5 +1,5 @@
 /* Service worker: keeps the app shell and the last data.json available offline. */
-const SHELL = "pulse-shell-v1";
+const SHELL = "pulse-shell-v2";
 const DATA = "pulse-data";
 const SHELL_FILES = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"];
@@ -25,7 +25,15 @@ self.addEventListener("fetch", (e) => {
     }).catch(() => caches.open(DATA).then((c) => c.match("data.json")).then((r) => r || Response.error())));
     return;
   }
-  if (url.hostname.endsWith("basemaps.cartocdn.com")) return;   // map tiles: let the browser cache them
+  if (url.hostname.endsWith("tile.openstreetmap.org")) return;   // map tiles: let the browser cache them
+  if (url.origin === location.origin) {
+    // The app's own files: network first so updates appear immediately; cache when offline.
+    e.respondWith(fetch(e.request).then((res) => {
+      if (res.ok) { const copy = res.clone(); caches.open(SHELL).then((c) => c.put(e.request, copy)); }
+      return res;
+    }).catch(() => caches.match(e.request).then((r) => r || caches.match("index.html"))));
+    return;
+  }
   e.respondWith(caches.match(e.request).then((hit) => hit || fetch(e.request).then((res) => {
     if (res.ok && (url.origin === location.origin || url.hostname === "unpkg.com" || url.hostname.endsWith("gstatic.com") || url.hostname.endsWith("googleapis.com"))) {
       const copy = res.clone(); caches.open(SHELL).then((c) => c.put(e.request, copy));
