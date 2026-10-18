@@ -3,6 +3,7 @@
     "enabled": true,
     "name": "Paris Open Data — traffic events",
     "url": "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/circulation_evenement/records?limit=100",
+    "page_url": "https://opendata.paris.fr/explore/dataset/circulation_evenement/",
     "type": "paris_open_data"
   },
   "rss_feeds": [

@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 
 import folium
 import pandas as pd
@@ -14,6 +14,8 @@ st.set_page_config(page_title="Paris Safety Navigator", page_icon="🛡️", lay
 ROOT = Path(__file__).parent
 CONFIG_PATH = ROOT / "sources.json"
 CACHE_TTL = 300
+# All times are stored in UTC and shown in Paris local time (CET in winter, CEST in summer).
+PARIS_TZ = ZoneInfo("Europe/Paris")
 
 st.markdown("""
 <style>
@@ -74,7 +76,8 @@ def fetch_paris_open_data(config):
                 "title": str(title)[:240],
                 "description": str(description)[:500],
                 "source": source.get("name", "Paris Open Data"),
-                "url": source["url"],
+                # Link people to the readable dataset page, not the raw API response.
+                "url": source.get("page_url") or source["url"],
                 "published": parse_datetime(date_value),
                 "lat": safe_float(lat),
                 "lon": safe_float(lon),
@@ -159,7 +162,8 @@ def display_time(dt):
     if not dt:
         return "Time not provided by source"
     try:
-        return dt.astimezone().strftime("%d %b %Y, %H:%M %Z")
+        # e.g. "Thu 03 Dec 2026, 14:30 CET (Paris time)"
+        return dt.astimezone(PARIS_TZ).strftime("%a %d %b %Y, %H:%M %Z") + " (Paris time)"
     except Exception:
         return str(dt)
 
@@ -172,17 +176,13 @@ st.warning(
 )
 
 with st.sidebar:
-    st.header("Trip settings")
-    trip_date = st.date_input("Travel date (optional)")
-    hotel_area = st.text_input("Hotel area / nearest Metro (optional)", placeholder="e.g. Opéra")
-    destination = st.text_input("Destination to check (optional)", placeholder="e.g. Louvre")
-    st.caption("Locations entered here are not sent to a server by this prototype.")
-    st.divider()
     st.markdown("**Data refresh**")
     if st.button("Refresh data now", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
     st.caption("Automatic dashboard cache: about 5 minutes. Source update frequency may differ.")
+    st.divider()
+    st.caption("Place and route checks are not available yet. This app does not use your location.")
 
 config = load_config()
 with st.spinner("Checking configured sources…"):
@@ -211,8 +211,6 @@ if errors:
 
 st.subheader("Map")
 m = folium.Map(location=[48.8566, 2.3522], zoom_start=12, tiles="OpenStreetMap")
-folium.Marker([48.8566, 2.3522], tooltip="Central Paris reference point",
-              popup="Reference point only — not a safety assessment").add_to(m)
 mapped = 0
 for event in events:
     lat, lon = event.get("lat"), event.get("lon")
@@ -224,6 +222,11 @@ for event in events:
                         tooltip=event["title"][:100], popup=folium.Popup(popup_text, max_width=320)).add_to(m)
     mapped += 1
 st_folium(m, use_container_width=True, height=430, returned_objects=[])
+st.caption(
+    f"🟠 Orange: flagged for review (keyword match) · 🔵 Blue: other source items. "
+    f"Showing {mapped} of {len(events)} items — only items with coordinates can be mapped; "
+    "see the full list below."
+)
 
 st.subheader("Reports and disruptions")
 if not events:
