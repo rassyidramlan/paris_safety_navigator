@@ -9,7 +9,7 @@ on:
     - cron: "4,14,24,34,44,54 * * * *"
   push:
     branches: [main]
-    paths: ["site/**", "collect.py", "prim_disruptions.py", "paris_open_data.py", "sources.json", "data/idfm_stops.json", ".github/workflows/pulse.yml"]
+    paths: ["site/**", "collect.py", "translate.py", "prim_disruptions.py", "paris_open_data.py", "sources.json", "data/idfm_stops.json", ".github/workflows/pulse.yml"]
 
 permissions:
   contents: read
@@ -36,10 +36,22 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install collector dependencies
-        run: pip install "requests>=2.32"
+        run: pip install "requests>=2.32" "ctranslate2>=4.4" "sentencepiece>=0.2"
+      # The translation model (~80 MB) is downloaded once and kept in the cache.
+      - uses: actions/cache@v4
+        with:
+          path: .cache/argos-fr-en
+          key: argos-fr-en-1.9
+      # Previous translations, so each notice is translated only once.
+      - uses: actions/cache@v4
+        with:
+          path: .cache/translations.json
+          key: translations-${{ github.run_id }}
+          restore-keys: translations-
       - name: Collect official feeds
         env:
           PRIM_API_KEY: ${{ secrets.PRIM_API_KEY }}
+        shell: bash   # "shell: bash" turns on pipefail, so a collector failure isn't hidden by tee
         run: python collect.py --out site/data.json | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

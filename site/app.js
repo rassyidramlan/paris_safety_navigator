@@ -1,17 +1,19 @@
-/* Paris Pulse — personal situational-awareness app.
-   Reads data.json (built every ~10 min by collect.py) and works out red/amber/green
-   for the user's saved places entirely on this phone. */
+/* Paris Pulse v2 — personal situational-awareness app.
+   Reads data.json (built every ~10 min by collect.py). Red / amber / clear for the user's
+   places and timed stops is worked out entirely on this phone; nothing personal is sent anywhere
+   (except a place search, which goes to Photon only when the user types). */
 "use strict";
 
 const TZ = "Europe/Paris";
 const REFRESH_MS = 2 * 60 * 1000;
-const STALE_MIN = 30;          // data older than this is flagged
-const DEAD_MIN = 90;           // older than this: the status can't be trusted
+const STALE_MIN = 30, DEAD_MIN = 90;
 const NEAR_TERM_H = 2;
-const R = { red: 500, amber: 2000, laterAmber: 1000, blocked: 500 };   // metres
+const R = { red: 500, amber: 2000, laterAmber: 1000, blocked: 500, stopAmber: 1500 };   // metres
 const LEVELS = ["green", "amber", "red"];
 const PARIS = { lat: 48.8566, lon: 2.3522 };
-const PARIS_RADIUS = 8000;     // metres from the centre counted as "Paris" for the headline numbers
+const PARIS_RADIUS = 8000;
+const STYLE = { dark: "https://tiles.openfreemap.org/styles/dark", light: "https://tiles.openfreemap.org/styles/positron" };
+const PHOTON = "https://photon.komoot.io/api/";
 
 const LINE_COLORS = {
   "Métro 1": "#FFCD00", "Métro 2": "#003CA6", "Métro 3": "#837902", "Métro 3B": "#6EC4E8",
@@ -20,32 +22,48 @@ const LINE_COLORS = {
   "Métro 11": "#704B1C", "Métro 12": "#007852", "Métro 13": "#6EC4E8", "Métro 14": "#62259D",
   "RER A": "#E3051C", "RER B": "#5291CE", "RER C": "#FFCE00", "RER D": "#00814F", "RER E": "#C04191",
 };
-const DARK_TEXT = new Set(["Métro 1", "Métro 3B", "Métro 5", "Métro 6", "Métro 7", "Métro 7B", "Métro 8",
-  "Métro 9", "Métro 13", "RER C"]);
+const DARK_TEXT = new Set(["Métro 1", "Métro 3B", "Métro 5", "Métro 6", "Métro 7", "Métro 7B", "Métro 8", "Métro 9", "Métro 13", "RER C"]);
+const CAT = {
+  demo: { label: "Demonstration", plural: "Demonstrations", color: "#e5484d", icon: '<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>' },
+  strike: { label: "Strike", plural: "Strikes", color: "#8e6cf0", icon: '<path d="M12 3v10M8.5 6.5 12 3l3.5 3.5"/><rect x="4" y="13" width="16" height="7" rx="2"/>' },
+  disruption: { label: "Métro / RER problem", plural: "Métro / RER", color: "#f0a020", icon: '<rect x="6" y="3" width="12" height="14" rx="3"/><path d="M6 11h12M9 21l1.5-4M15 21l-1.5-4"/><circle cx="9" cy="14" r=".6"/><circle cx="15" cy="14" r=".6"/>' },
+  works: { label: "Planned works", plural: "Planned works", color: "#5b7ee8", icon: '<path d="M4 20h16M7 20l4-14h2l4 14M9 14h6"/>' },
+  road: { label: "Roadworks", plural: "Roads", color: "#8b93a1", icon: '<path d="M6 20 10 4M18 20 14 4M12 6v2M12 11v2M12 16v2"/>' },
+};
 
-/* ---------- storage (may be unavailable; app must still work) ---------- */
+/* ---------- storage (may be unavailable; the app must still work) ---------- */
 const store = {
   get(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; } },
   set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode */ } },
 };
 
 const state = {
-  data: null, loadedAt: null, error: null,
+  data: null, error: null,
   places: store.get("places", []),
+  stops: store.get("stops", []),
   gps: store.get("gps", false), me: null,
-  layers: { demo: true, strike: true, disruption: true, works: false, road: false, places: true, ...store.get("layers", {}) },
-  feedFilter: "all", wideArea: false, lastLevels: store.get("lastLevels", {}),
-  picking: false,
+  layers: { demo: true, strike: true, disruption: true, works: false, road: false, ...store.get("layers2", {}) },
+  feedFilter: "all", feedQuery: "", wide: false,
+  day: null, lastLevels: store.get("lastLevels", {}), original: {},
+  picking: false, chosen: null,
 };
 
 /* ---------- helpers ---------- */
-const $ = (sel) => document.querySelector(sel);
+const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const fmtTime = (iso) => iso ? new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(iso)) : "";
-const fmtClock = (iso) => iso ? new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", minute: "2-digit" }).format(new Date(iso)) : "";
-const sameParisDay = (a, b) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(a) === new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(b);
+const fmt = (opts) => new Intl.DateTimeFormat("en-GB", { timeZone: TZ, ...opts });
+const fTime = fmt({ hour: "2-digit", minute: "2-digit" });
+const fDay = fmt({ weekday: "short", day: "numeric", month: "short" });
+const fFull = fmt({ weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const fKey = new Intl.DateTimeFormat("en-CA", { timeZone: TZ });
+const dayKey = (d) => fKey.format(d);
+const clock = (iso) => (iso ? fTime.format(new Date(iso)) : "");
+const when = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return dayKey(d) === dayKey(new Date()) ? fTime.format(d) : fFull.format(d);
+};
 const minutesSince = (iso) => (Date.now() - new Date(iso).getTime()) / 60000;
-
 function ago(iso) {
   const m = Math.max(0, Math.round(minutesSince(iso)));
   if (m < 1) return "just now";
@@ -53,327 +71,435 @@ function ago(iso) {
   const h = Math.floor(m / 60);
   return h < 24 ? `${h} h ago` : `${Math.floor(h / 24)} d ago`;
 }
-
 function distance(a, b) {
-  const rad = Math.PI / 180, dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) ** 2;
+  const r = Math.PI / 180, dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2;
   return 2 * 6371000 * Math.asin(Math.sqrt(h));
 }
-const fmtDist = (m) => m < 950 ? `${Math.round(m / 50) * 50} m` : `${(m / 1000).toFixed(1)} km`;
+const fmtDist = (m) => (m < 950 ? `${Math.round(m / 50) * 50} m` : `${(m / 1000).toFixed(1)} km`);
 
+/** Paris wall-clock date + time ("2026-12-04", "14:00") -> Date. */
+function parisDate(day, time) {
+  const [y, mo, d] = day.split("-").map(Number), [h, mi] = time.split(":").map(Number);
+  const guess = Date.UTC(y, mo - 1, d, h, mi);
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: TZ, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+    .formatToParts(new Date(guess)).map((p) => [p.type, p.value]));
+  const asParis = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute);
+  return new Date(guess - (asParis - guess));
+}
+
+const titleOf = (ev) => (state.original[ev.id] ? ev.title : ev.title_en || ev.title);
+const GENERIC = /(event|works?|construction|travaux|évènement|événement)\s*-\s*stop\s*\(s\)\s*not served|arrêts? non desservis?/i;
+/** Short headline for lists: names the place instead of repeating "Event - Stop (s) not served". */
+function headline(ev) {
+  const t = titleOf(ev);
+  if (!GENERIC.test(t) && !/^#?InfoTrafic/i.test(t)) return t;
+  const where = (ev.stops || []).slice(0, 2).map((s) => s.n).join(" · ");
+  const kind = { demo: "Demonstration", strike: "Strike", disruption: "Disruption", works: "Works" }[ev.cat] || "Notice";
+  return where ? `${kind} · ${where}` : t;
+}
+const textOf = (ev) => (state.original[ev.id] ? ev.text : ev.text_en || ev.text);
+const isNearTerm = (ev) => ev.status === "active" || (ev.start && new Date(ev.start) - Date.now() <= NEAR_TERM_H * 3600e3);
+const isToday = (ev) => ev.status === "active" || (ev.start && dayKey(new Date(ev.start)) === dayKey(new Date()));
 function timing(ev) {
-  if (ev.status === "active") return ev.end ? `Now until ${sameParisDay(new Date(), new Date(ev.end)) ? fmtClock(ev.end) : fmtTime(ev.end)}` : "Now";
-  if (ev.status === "upcoming") return `Starts ${fmtTime(ev.start)}`;
+  if (ev.status === "active") return ev.end ? `Now until ${when(ev.end)}` : "Now";
+  if (ev.status === "upcoming") return `From ${when(ev.start)}`;
   return "";
 }
-const isNearTerm = (ev) => ev.status === "active" || (ev.start && new Date(ev.start) - Date.now() <= NEAR_TERM_H * 3600e3);
-const isToday = (ev) => isNearTerm(ev) || (ev.start && new Date(ev.start) - Date.now() <= 24 * 3600e3);
-
 function badge(line) {
-  const color = LINE_COLORS[line];
-  const isRer = line.startsWith("RER") || line.startsWith("Transilien");
-  const isBus = line.startsWith("Bus");
-  const label = line.replace(/^(Métro|RER|Transilien|Tram|Bus|Shuttle) /, "");
-  const style = color ? `style="background:${color};color:${DARK_TEXT.has(line) ? "#14141a" : "#fff"}"` : "";
-  return `<span class="badge${isRer ? " rer" : ""}${isBus ? " bus" : ""}" ${style} title="${esc(line)}">${esc(isBus ? line : label)}</span>`;
+  const color = LINE_COLORS[line], isBus = line.startsWith("Bus"), isRer = /^(RER|Transilien)/.test(line);
+  const label = isBus ? line : line.replace(/^(Métro|RER|Transilien|Tram|Shuttle) /, "");
+  const style = color ? ` style="background:${color};color:${DARK_TEXT.has(line) ? "#15161a" : "#fff"}"` : "";
+  return `<span class="badge${isRer ? " rer" : ""}${isBus ? " bus" : ""}"${style} title="${esc(line)}">${esc(label)}</span>`;
 }
+const icon = (cat) => `<span class="tile ${cat}"><svg viewBox="0 0 24 24" aria-hidden="true">${(CAT[cat] || CAT.road).icon}</svg></span>`;
 
-/* ---------- status levels for a point ---------- */
+/* ---------- status levels ---------- */
 function nearestStop(ev, point) {
-  const pts = ev.stops && ev.stops.length ? ev.stops : (ev.lat != null ? [{ n: "", lat: ev.lat, lon: ev.lon }] : []);
+  const pts = ev.stops && ev.stops.length ? ev.stops : ev.lat != null ? [{ n: "", lat: ev.lat, lon: ev.lon }] : [];
   let best = null;
-  for (const s of pts) {
-    const d = distance(point, s);
-    if (!best || d < best.d) best = { d, stop: s };
+  for (const s of pts) { const d = distance(point, s); if (!best || d < best.d) best = { d, stop: s }; }
+  return best;
+}
+function inParis(ev) {
+  const near = nearestStop(ev, PARIS);
+  if (!near) return (ev.modes || []).some((m) => m !== "Bus");
+  return near.d <= PARIS_RADIUS;
+}
+function describe(ev, near, at) {
+  const what = ev.cat === "demo" ? "Demonstration" : "Line blocked";
+  const where = near.stop.n ? ` · ${near.stop.n}` : "";
+  const time = at ? "" : ev.status === "active" ? " · now" : ` · from ${when(ev.start)}`;
+  return `${what} ${fmtDist(near.d)} away${where}${time}`;
+}
+/** Status for a place right now. */
+function assess(point, events) {
+  let best = { level: "green", why: "Nothing flagged nearby", cause: null }, rank = -1;
+  for (const ev of events) {
+    if (ev.status === "ended") continue;
+    const near = nearestStop(ev, point); if (!near) continue;
+    let l = null, r = 0;
+    if (ev.cat === "demo") {
+      if (isNearTerm(ev) && near.d <= R.red) { l = "red"; r = 30 - near.d / 1e3; }
+      else if (isNearTerm(ev) && near.d <= R.amber) { l = "amber"; r = 20 - near.d / 1e3; }
+      else if (isToday(ev) && near.d <= R.laterAmber) { l = "amber"; r = 15 - near.d / 1e3; }
+    } else if (ev.cat === "disruption" && ev.sev === "Blocking" && ev.status === "active" && near.d <= R.blocked) { l = "amber"; r = 10 - near.d / 1e3; }
+    if (l && r > rank) { rank = r; best = { level: l, why: describe(ev, near), cause: ev }; }
   }
   return best;
 }
-
-function assess(point, events) {
-  let level = "green", why = "Nothing flagged nearby", cause = null, bestRank = -1;
+/** Status for a stop at a given time: checks one hour before to two hours after. */
+function assessAt(point, events, at) {
+  const from = at.getTime() - 3600e3, to = at.getTime() + 2 * 3600e3;
+  let best = { level: "green", why: "Clear at that time", cause: null }, rank = -1;
   for (const ev of events) {
     if (ev.status === "ended") continue;
-    const near = nearestStop(ev, point);
-    if (!near) continue;
-    let l = null, rank = 0;
-    if (ev.cat === "demo") {
-      if (isNearTerm(ev) && near.d <= R.red) { l = "red"; rank = 30 - near.d / 1000; }
-      else if (isNearTerm(ev) && near.d <= R.amber) { l = "amber"; rank = 20 - near.d / 1000; }
-      else if (isToday(ev) && near.d <= R.laterAmber) { l = "amber"; rank = 15 - near.d / 1000; }
-    } else if (ev.cat === "disruption" && ev.sev === "Blocking" && ev.status === "active" && near.d <= R.blocked) {
-      l = "amber"; rank = 10 - near.d / 1000;
-    }
-    if (l && rank > bestRank) {
-      bestRank = rank; level = l; cause = ev;
-      const what = ev.cat === "demo" ? "Demonstration" : "Line blocked";
-      const where = near.stop.n ? ` · ${near.stop.n}` : "";
-      why = `${what} ${fmtDist(near.d)} away${where} · ${ev.status === "active" ? "now" : "from " + fmtClock(ev.start)}`;
-    }
+    const s = ev.start ? new Date(ev.start).getTime() : -Infinity, e = ev.end ? new Date(ev.end).getTime() : Infinity;
+    if (e < from || s > to) continue;
+    const near = nearestStop(ev, point); if (!near) continue;
+    let l = null, r = 0;
+    if (ev.cat === "demo" && near.d <= R.red) { l = "red"; r = 30 - near.d / 1e3; }
+    else if (ev.cat === "demo" && near.d <= R.stopAmber) { l = "amber"; r = 20 - near.d / 1e3; }
+    else if (ev.cat === "disruption" && ev.sev === "Blocking" && near.d <= R.blocked) { l = "amber"; r = 10 - near.d / 1e3; }
+    if (l && r > rank) { rank = r; best = { level: l, why: describe(ev, near, true), cause: ev }; }
   }
-  return { level, why, cause };
+  return best;
 }
+const worst = (ls) => ls.reduce((a, b) => (LEVELS.indexOf(b) > LEVELS.indexOf(a) ? b : a), "green");
 
-function inParis(ev) {
-  const near = nearestStop(ev, PARIS);
-  if (!near) return (ev.modes || []).some((m) => m !== "Bus");   // whole Métro/RER line: keep; unplaced bus: drop
-  return near.d <= PARIS_RADIUS;
+/* ---------- data ---------- */
+const events = () => (state.data ? state.data.events : []);
+const parisEvents = () => events().filter(inParis);
+function watchPoints() {
+  const pts = state.places.map((p) => ({ ...p, kind: "place" }));
+  if (state.gps && state.me) pts.unshift({ id: "me", name: "You", ...state.me, kind: "me" });
+  return pts;
 }
-
-function worst(levels) { return levels.reduce((a, b) => (LEVELS.indexOf(b) > LEVELS.indexOf(a) ? b : a), "green"); }
-
-/* ---------- data loading ---------- */
+function upcomingStops(hours = 3) {
+  const now = Date.now();
+  return state.stops.map((s) => ({ ...s, at: parisDate(s.date, s.time) }))
+    .filter((s) => s.at.getTime() >= now - 3600e3 && s.at.getTime() <= now + hours * 3600e3);
+}
 async function load() {
   try {
     const res = await fetch(`data.json?t=${Date.now()}`, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    state.data = await res.json();
-    state.error = null;
-  } catch (err) {
-    state.error = "Couldn't reach the server. Showing the last saved data.";
-    if (!state.data) {
-      try { const cached = await caches.match("data.json", { ignoreSearch: true }); if (cached) state.data = await cached.json(); } catch { /* none */ }
-    }
+    state.data = await res.json(); state.error = null;
+  } catch {
+    state.error = "offline";
+    if (!state.data) { try { const c = await caches.match("data.json", { ignoreSearch: true }); if (c) state.data = await c.json(); } catch { /* none */ } }
   }
-  state.loadedAt = new Date();
   render();
 }
 
-const events = () => (state.data ? state.data.events : []);
-const watchPoints = () => {
-  const pts = state.places.map((p) => ({ ...p, kind: "place" }));
-  if (state.gps && state.me) pts.unshift({ id: "me", name: "You", lat: state.me.lat, lon: state.me.lon, kind: "me" });
-  return pts;
-};
-
-/* ---------- plaque ---------- */
-function renderPlaque() {
-  const el = $("#plaque"), title = $("#plaque-title"), sub = $("#plaque-sub"), age = $("#plaque-age");
-  if (!state.data) {
-    el.dataset.level = "loading"; title.textContent = state.error ? "No data yet" : "Loading…";
-    sub.textContent = state.error || "Checking official feeds"; age.textContent = ""; return;
-  }
-  const genAge = minutesSince(state.data.generated_at);
-  age.textContent = (genAge > STALE_MIN ? "Old data · " : "") + ago(state.data.generated_at);
-  if (genAge > DEAD_MIN) {
-    el.dataset.level = "stale"; title.textContent = "Data is out of date";
-    sub.textContent = "Check the official apps (SOS tab) until it updates"; return;
-  }
-  const evs = events();
-  const demosNow = evs.filter((e) => e.cat === "demo" && isNearTerm(e) && inParis(e)).length;
-  const pts = watchPoints();
-  let level, t, s;
-  if (pts.length) {
-    const results = pts.map((p) => ({ p, ...assess(p, evs) }));
+/* ---------- status card ---------- */
+function renderStatus() {
+  const el = $("#status"), t = $("#status-title"), s = $("#status-sub");
+  if (!state.data) { el.dataset.level = "loading"; t.textContent = state.error ? "No data yet" : "Loading"; s.textContent = state.error ? "Check your connection" : "Checking official feeds…"; return; }
+  const age = minutesSince(state.data.generated_at), fresh = ago(state.data.generated_at);
+  if (age > DEAD_MIN) { el.dataset.level = "stale"; t.textContent = "Data is out of date"; s.textContent = `Last update ${fresh}. Use the official apps in Help.`; el._cause = null; return; }
+  const evs = events(), pe = parisEvents();
+  const demos = pe.filter((e) => e.cat === "demo" && isNearTerm(e)).length;
+  const results = watchPoints().map((p) => ({ name: p.name, ...assess(p, evs) }))
+    .concat(upcomingStops().map((st) => ({ name: `${st.name} at ${st.time}`, ...assessAt(st, evs, st.at) })));
+  let level, title, sub, cause = null;
+  if (results.length) {
     level = worst(results.map((r) => r.level));
     const top = results.find((r) => r.level === level) || results[0];
-    t = level === "red" ? `Red near ${top.p.name}` : level === "amber" ? `Amber near ${top.p.name}` : "Clear near your places";
-    s = level === "green" ? `${demosNow} demonstration notice${demosNow === 1 ? "" : "s"} elsewhere in Paris` : top.why;
+    cause = top.cause;
+    title = level === "red" ? `Demonstration near ${top.name}` : level === "amber" ? `Watch out near ${top.name}` : "Clear near your places";
+    sub = level === "green" ? `${demos} demonstration notice${demos === 1 ? "" : "s"} elsewhere in Paris` : top.why;
   } else {
-    level = demosNow ? "amber" : "green";
-    t = demosNow ? `${demosNow} demonstration notice${demosNow === 1 ? "" : "s"} in Paris` : "No demonstration notices";
-    s = "Add your hotel in Places for alerts near you";
+    level = demos ? "amber" : "green";
+    title = demos ? `${demos} demonstration notice${demos === 1 ? "" : "s"} in Paris` : "No demonstration notices";
+    sub = "Add your hotel in Today for alerts near you";
   }
-  if (state.error) s = `Offline · ${s}`;
-  const was = el.dataset.level;
-  el.dataset.level = level; title.textContent = t; sub.textContent = s;
-  el.classList.toggle("fresh", level === "red" && was !== "red");
+  sub += ` · ${age > STALE_MIN ? "data " : "updated "}${fresh}${state.error ? " · offline" : ""}`;
+  el.dataset.level = level; t.textContent = title; s.textContent = sub; el._cause = cause;
+  const badgeEl = $("#feed-badge"); badgeEl.hidden = !demos; badgeEl.textContent = demos;
 }
 
 /* ---------- map ---------- */
-let map, layerGroups = {};
+let map = null, markers = [];
+const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
 function initMap() {
-  map = L.map("map", { zoomControl: false, preferCanvas: true, attributionControl: true }).setView([48.8566, 2.3522], 13);
-  // OpenStreetMap's standard tiles (free, no key). Darkened with a CSS filter on the tile pane.
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19, className: "dark-tiles",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  }).addTo(map);
-  map.attributionControl.setPosition("topright");
-  for (const k of ["road", "works", "disruption", "strike", "demo", "places"]) layerGroups[k] = L.layerGroup().addTo(map);
-  map.on("click", (e) => { if (state.picking) finishPick(e.latlng); });
+  if (!window.maplibregl) { $("#map").innerHTML = '<p class="empty" style="padding:140px 20px">The map could not load. The list still works.</p>'; return; }
+  try {
+    map = new maplibregl.Map({ container: "map", style: darkQuery.matches ? STYLE.dark : STYLE.light, center: [PARIS.lon, PARIS.lat], zoom: 12.2,
+      attributionControl: { compact: true }, pitchWithRotate: false, dragRotate: false });
+  } catch { $("#map").innerHTML = '<p class="empty" style="padding:140px 20px">This phone can\'t show the map. The list still works.</p>'; return; }
+  map.touchZoomRotate.disableRotation();
+  map.on("style.load", addLayers);
+  map.on("click", (e) => {
+    if (state.picking) return finishPick({ lat: e.lngLat.lat, lon: e.lngLat.lng });
+    const hit = map.queryRenderedFeatures(e.point, { layers: ["dots", "roads"].filter((l) => map.getLayer(l)) })[0];
+    if (hit) { const ev = events().find((x) => x.id === hit.properties.id); if (ev) showDetail(ev); }
+  });
+  for (const l of ["dots", "roads"]) {
+    map.on("mouseenter", l, () => (map.getCanvas().style.cursor = "pointer"));
+    map.on("mouseleave", l, () => (map.getCanvas().style.cursor = ""));
+  }
+  darkQuery.addEventListener("change", (e) => map.setStyle(e.matches ? STYLE.dark : STYLE.light));
 }
-
-function hull(points) {
-  const p = points.map((s) => [s.lon, s.lat]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-  if (p.length < 3) return null;
-  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
-  const lower = [], upper = [];
-  for (const pt of p) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], pt) <= 0) lower.pop(); lower.push(pt); }
-  for (const pt of p.slice().reverse()) { while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], pt) <= 0) upper.pop(); upper.push(pt); }
-  return lower.slice(0, -1).concat(upper.slice(0, -1)).map(([lon, lat]) => [lat, lon]);
+function geo() {
+  const pts = [], lines = [];
+  for (const ev of events()) {
+    if (!state.layers[ev.cat]) continue;
+    if (ev.cat === "road") { if (!ev.lt && ev.pts && ev.pts.length > 1) lines.push({ type: "Feature", properties: { id: ev.id }, geometry: { type: "LineString", coordinates: ev.pts.map(([a, b]) => [b, a]) } }); continue; }
+    const soon = ev.cat === "demo" && isNearTerm(ev);
+    for (const s of ev.stops || []) pts.push({ type: "Feature", properties: { id: ev.id, cat: ev.cat, soon }, geometry: { type: "Point", coordinates: [s.lon, s.lat] } });
+  }
+  return { pts: { type: "FeatureCollection", features: pts }, lines: { type: "FeatureCollection", features: lines } };
 }
-
+function addLayers() {
+  const g = geo();
+  map.addSource("events", { type: "geojson", data: g.pts });
+  map.addSource("roadlines", { type: "geojson", data: g.lines });
+  map.addLayer({ id: "roads", type: "line", source: "roadlines", paint: { "line-color": CAT.road.color, "line-width": 4, "line-opacity": 0.75 } });
+  map.addLayer({ id: "glow", type: "circle", source: "events", filter: ["==", ["get", "cat"], "demo"], paint: {
+    "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 10, 13, 26, 16, 70],
+    "circle-color": ["case", ["get", "soon"], CAT.demo.color, "#ff8a3d"], "circle-opacity": ["case", ["get", "soon"], 0.32, 0.18], "circle-blur": 0.7 } });
+  map.addLayer({ id: "dots", type: "circle", source: "events", paint: {
+    "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 3, 14, 6, 17, 9],
+    "circle-color": ["match", ["get", "cat"], "demo", CAT.demo.color, "strike", CAT.strike.color, "disruption", CAT.disruption.color, CAT.works.color],
+    "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.5 } });
+}
 function renderMap() {
   if (!map) return;
-  Object.values(layerGroups).forEach((g) => g.clearLayers());
-  for (const ev of events()) {
-    const g = layerGroups[ev.cat];
-    if (!g || !state.layers[ev.cat]) continue;
-    const open = () => showDetail(ev);
-    if (ev.cat === "road") {
-      if (ev.lt) continue;
-      if (ev.pts && ev.pts.length > 1) L.polyline(ev.pts, { color: "#8a97ad", weight: 4, opacity: 0.7 }).on("click", open).addTo(g);
-      continue;
-    }
-    const stops = ev.stops || [];
-    if (!stops.length) continue;
-    if (ev.cat === "demo") {
-      const soon = isNearTerm(ev);
-      const color = soon ? "#ff2e48" : "#ff8a3d";
-      // A soft disc around every affected stop: overlapping discs form the affected area.
-      stops.forEach((s) => {
-        L.circle([s.lat, s.lon], { radius: 200, stroke: false, fillColor: color, fillOpacity: soon ? 0.28 : 0.16, interactive: false }).addTo(g);
-        L.circleMarker([s.lat, s.lon], { radius: 5, color: "#fff", weight: 1.5, fillColor: color, fillOpacity: 1 })
-          .bindTooltip(s.n, { direction: "top" }).on("click", open).addTo(g);
-      });
-    } else {
-      const color = { disruption: "#f2a20c", strike: "#b98cff" }[ev.cat] || "#6f8fc9";
-      stops.forEach((s) => L.circleMarker([s.lat, s.lon], { radius: ev.cat === "works" ? 5 : 7, color: "#0c2147", weight: 2, fillColor: color, fillOpacity: 0.95 })
-        .bindTooltip(s.n, { direction: "top" }).on("click", open).addTo(g));
-    }
-  }
-  if (state.layers.places) {
-    for (const p of watchPoints()) {
-      const html = p.kind === "me" ? '<div class="me"></div>' : `<div class="pin">${esc(p.name)}</div>`;
-      const icon = L.divIcon({ html, className: "", iconSize: null, iconAnchor: p.kind === "me" ? [8, 8] : [20, 12] });
-      L.marker([p.lat, p.lon], { icon, keyboard: false }).addTo(layerGroups.places);
-    }
+  const g = geo();
+  if (map.getSource("events")) { map.getSource("events").setData(g.pts); map.getSource("roadlines").setData(g.lines); }
+  markers.forEach((m) => m.remove()); markers = [];
+  const evs = events();
+  for (const p of watchPoints()) {
+    const el = document.createElement("div");
+    if (p.kind === "me") el.className = "me";
+    else { const lv = assess(p, evs).level; el.className = `pin ${lv}`; el.innerHTML = `<i>${esc(p.name.slice(0, 1).toUpperCase())}</i>${esc(p.name)}`; }
+    markers.push(new maplibregl.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(map));
   }
 }
-
 function renderLayerChips() {
-  const items = [["demo", "Demonstrations"], ["strike", "Strikes"], ["disruption", "Métro/RER problems"], ["works", "Planned works"], ["road", "Roadworks"], ["places", "My places"]];
-  $("#layers").innerHTML = items.map(([k, label]) => `<button class="layer" data-layer="${k}" aria-pressed="${!!state.layers[k]}">${label}</button>`).join("");
+  const counts = {}; for (const e of parisEvents()) counts[e.cat] = (counts[e.cat] || 0) + 1;
+  $("#layers").innerHTML = ["demo", "strike", "disruption", "works", "road"].map((k) =>
+    `<button class="chip" data-layer="${k}" aria-pressed="${!!state.layers[k]}"><span class="swatch" style="background:${CAT[k].color}"></span>${CAT[k].plural}${counts[k] ? ` <span class="n">${counts[k]}</span>` : ""}</button>`).join("");
+}
+function fitTo(points) {
+  if (!map || !points.length) return;
+  if (points.length === 1) return map.flyTo({ center: [points[0].lon, points[0].lat], zoom: 15 });
+  const b = new maplibregl.LngLatBounds(); points.forEach((p) => b.extend([p.lon, p.lat]));
+  map.fitBounds(b, { padding: { top: 170, bottom: 300, left: 40, right: 40 }, maxZoom: 16 });
+}
+
+/* ---------- bottom sheet ---------- */
+const SNAPS = { peek: 0.70, half: 0.42, full: 0 };
+function setSnap(name) {
+  const sheet = $("#sheet"); sheet.dataset.snap = name; sheet.style.transform = "";
+  const visible = (1 - SNAPS[name]) * 0.92;   // share of the view the sheet covers
+  $("#locate").style.bottom = name === "full" ? "-80px" : `calc(${(visible * 100).toFixed(1)}% + 14px)`;
+}
+function bindSheet() {
+  const sheet = $("#sheet"), grab = $("#sheet-grab"), body = $("#sheet-body");
+  let startY = 0, startT = 0, dragging = false;
+  const h = () => sheet.getBoundingClientRect().height;
+  const current = () => SNAPS[sheet.dataset.snap] * h();
+  const down = (e) => { dragging = true; startY = e.clientY; startT = current(); sheet.classList.add("dragging"); sheet.setPointerCapture?.(e.pointerId); };
+  grab.addEventListener("pointerdown", down);
+  body.addEventListener("pointerdown", (e) => { if (sheet.dataset.snap !== "full" || body.scrollTop <= 0) { startY = e.clientY; startT = current(); dragging = "maybe"; } });
+  window.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const dy = e.clientY - startY;
+    if (dragging === "maybe") { if (Math.abs(dy) < 8 || (sheet.dataset.snap === "full" && dy < 0)) return; dragging = true; sheet.classList.add("dragging"); }
+    const t = Math.min(Math.max(startT + dy, 0), SNAPS.peek * h());
+    sheet.style.transform = `translateY(${t}px)`;
+  });
+  window.addEventListener("pointerup", (e) => {
+    if (!dragging) return;
+    const wasDrag = dragging === true; dragging = false; sheet.classList.remove("dragging");
+    if (!wasDrag) return;
+    if (Math.abs(e.clientY - startY) < 6) {   // a tap on the handle: step through the heights
+      const next = { peek: "half", half: "full", full: "peek" }[sheet.dataset.snap];
+      return setSnap(next);
+    }
+    const t = startT + (e.clientY - startY), frac = t / h();
+    const name = Object.entries(SNAPS).sort((a, b) => Math.abs(a[1] - frac) - Math.abs(b[1] - frac))[0][0];
+    setSnap(name);
+  });
+  grab.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSnap({ peek: "half", half: "full", full: "peek" }[sheet.dataset.snap]); } });
+  setSnap("peek");
 }
 
 /* ---------- lists ---------- */
-function rank(ev) {
-  const cat = { demo: 0, strike: 1, disruption: 2, works: 3, road: 4 }[ev.cat] ?? 5;
-  const time = ev.status === "active" ? 0 : 1;
-  return [cat, time, ev.start ? new Date(ev.start).getTime() : 0];
-}
-const byRank = (a, b) => { const x = rank(a), y = rank(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; };
-
-function row(ev, extra = "") {
-  const when = ev.status === "active" ? '<span class="tag now">Now</span>' : (isToday(ev) ? '<span class="tag soon">Today</span>' : "");
+const order = { demo: 0, strike: 1, disruption: 2, works: 3, road: 4 };
+const byRank = (a, b) => (order[a.cat] - order[b.cat]) || ((a.status === "active" ? 0 : 1) - (b.status === "active" ? 0 : 1))
+  || ((a.start ? +new Date(a.start) : 0) - (b.start ? +new Date(b.start) : 0));
+function row(ev) {
+  const tag = ev.status === "active" ? '<span class="when now">Now</span>' : isToday(ev) ? `<span class="when today">${clock(ev.start)}</span>` : `<span class="when later">${ev.start ? fDay.format(new Date(ev.start)) : ""}</span>`;
   const lines = (ev.lines || []).slice(0, 6).map(badge).join("");
-  const where = ev.stops && ev.stops.length ? ev.stops.slice(0, 3).map((s) => s.n).join(", ") : "";
-  return `<button class="ev" data-id="${esc(ev.id)}" data-cat="${ev.cat}">
-    <span class="ev-title">${when}${esc(ev.title)}</span>
-    <span class="ev-meta">${esc(timing(ev))}${where ? " · " + esc(where) : ""}${extra}</span>
-    ${lines ? `<span class="ev-lines">${lines}</span>` : ""}
-  </button>`;
+  const where = (ev.stops || []).slice(0, 3).map((s) => s.n).join(", ");
+  return `<button class="ev" data-id="${esc(ev.id)}">${icon(ev.cat)}
+    <span class="ev-main"><span class="ev-title">${esc(headline(ev))}</span>
+      <span class="ev-meta">${esc(timing(ev))}${where ? ` · ${esc(where)}` : ""}</span>
+      ${lines ? `<span class="ev-lines">${lines}</span>` : ""}</span>${tag}</button>`;
 }
+function placeRow(p, a, time = "") {
+  return `<div class="place" data-place="${esc(p.id)}">${time ? `<span class="place-time">${esc(time)}</span>` : `<span class="dot ${a.level}"></span>`}
+    <div><div class="place-name">${time ? `<span class="dot ${a.level}"></span> ` : ""}${esc(p.name)}</div><div class="place-why ${a.level}">${esc(a.why)}</div></div>
+    ${p.kind === "me" ? "" : `<button class="icon-btn" data-remove="${esc(p.id)}" aria-label="Remove ${esc(p.name)}"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`}</div>`;
+}
+const skeleton = () => '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
 
-function renderNow() {
-  const evs = events().filter(inParis);
-  const demosNow = evs.filter((e) => e.cat === "demo" && isNearTerm(e));
-  const demosLater = evs.filter((e) => e.cat === "demo" && !isNearTerm(e));
-  const blocked = evs.filter((e) => (e.cat === "disruption" || e.cat === "strike") && e.status === "active");
-  let html = `<div class="stats">
-    <div class="stat red"><b>${demosNow.length}</b><span>demos now or within 2 h</span></div>
-    <div class="stat"><b>${demosLater.length}</b><span>demos later this week</span></div>
-    <div class="stat amber"><b>${blocked.length}</b><span>Métro/RER problems or strikes</span></div></div>
-    <p class="lede">Central Paris (within 8 km of Notre-Dame).</p>`;
+function renderSheet() {
+  if (!state.data) { $("#sheet-body").innerHTML = skeleton(); return; }
+  const pe = parisEvents(), evs = events();
+  const now = pe.filter((e) => (e.cat === "demo" && isNearTerm(e)) || ((e.cat === "strike" || e.cat === "disruption") && e.status === "active")).sort(byRank);
+  const later = pe.filter((e) => e.cat === "demo" && !isNearTerm(e)).sort(byRank);
   const pts = watchPoints();
-  if (pts.length) {
-    html += `<p class="section-label">Your places</p>`;
-    html += pts.map((p) => { const a = assess(p, events()); return `<div class="place"><span class="dot ${a.level}"></span><div class="place-main"><div class="place-name">${esc(p.name)}</div><div class="place-why">${esc(a.why)}</div></div></div>`; }).join("");
-  }
-  const top = demosNow.concat(blocked).sort(byRank);
-  html += `<p class="section-label">Happening now</p>`;
-  html += top.length ? top.map((e) => row(e)).join("") : `<p class="empty">No demonstration, strike or Métro/RER notices right now.</p>`;
-  if (demosLater.length) html += `<p class="section-label">Coming up</p>` + demosLater.sort(byRank).slice(0, 8).map((e) => row(e)).join("");
-  $("#now-body").innerHTML = html;
+  let html = `<p class="sheet-title">${pts.length ? "Near your places" : "Happening in Paris"}</p>`;
+  if (pts.length) html += `<div class="list">${pts.map((p) => placeRow(p, assess(p, evs))).join("")}</div><p class="section-label">Happening now</p>`;
+  html += now.length ? `<div class="list">${now.map(row).join("")}</div>` : '<p class="empty">No demonstration, strike or Métro/RER notices right now.</p>';
+  if (later.length) html += `<p class="section-label">Coming up</p><div class="list">${later.slice(0, 10).map(row).join("")}</div>`;
+  $("#sheet-body").innerHTML = html;
 }
 
 function renderFeed() {
-  const evs = events().filter((e) => state.wideArea || inParis(e));
-  const filters = [["all", "All"], ["demo", "Demonstrations"], ["strike", "Strikes"], ["disruption", "Métro/RER"], ["works", "Planned works"], ["road", "Roads"]];
-  const count = (k) => k === "all" ? evs.filter((e) => e.cat !== "road").length : evs.filter((e) => e.cat === k && !(k === "road" && e.lt)).length;
-  $("#feed-filters").innerHTML = filters.map(([k, label]) => `<button class="chip" role="tab" data-filter="${k}" aria-selected="${state.feedFilter === k}">${label} <span class="count">${count(k)}</span></button>`).join("")
-    + `<button class="chip" data-wide="1" aria-selected="${state.wideArea}">Include suburbs</button>`;
-  const list = evs.filter((e) => state.feedFilter === "all" ? e.cat !== "road" : e.cat === state.feedFilter && !e.lt).sort(byRank);
-  const sources = (state.data?.sources || []).map((s) => `${esc(s.name)}: ${s.ok ? `${s.count} items` : "unavailable"}`).join(" · ");
-  $("#feed-list").innerHTML = (list.length ? list.map((e) => row(e)).join("") : `<p class="empty">Nothing in this category right now.</p>`)
-    + `<p class="lede" style="margin-top:16px">${sources}</p>`;
+  if (!state.data) { $("#feed-list").innerHTML = skeleton(); return; }
+  const base = events().filter((e) => (state.wide || inParis(e)) && !(e.cat === "road" && e.lt));
+  const q = state.feedQuery.trim().toLowerCase();
+  const matches = (e) => !q || [titleOf(e), textOf(e), ...(e.lines || []), ...(e.stops || []).map((s) => s.n)].join(" ").toLowerCase().includes(q);
+  const cats = ["all", "demo", "strike", "disruption", "works", "road"];
+  const count = (k) => base.filter((e) => (k === "all" ? e.cat !== "road" : e.cat === k) && matches(e)).length;
+  $("#feed-filters").innerHTML = cats.map((k) => `<button class="chip" role="tab" data-filter="${k}" aria-selected="${state.feedFilter === k}">${k === "all" ? "All" : CAT[k].plural} <span class="n">${count(k)}</span></button>`).join("")
+    + `<button class="chip" data-wide="1" aria-pressed="${state.wide}">Suburbs</button>`;
+  const list = base.filter((e) => (state.feedFilter === "all" ? e.cat !== "road" : e.cat === state.feedFilter) && matches(e)).sort(byRank);
+  const groups = [["Now", list.filter((e) => e.status === "active")], ["Later today", list.filter((e) => e.status !== "active" && isToday(e))], ["This week", list.filter((e) => e.status !== "active" && !isToday(e))]];
+  $("#feed-list").innerHTML = list.length ? groups.filter(([, l]) => l.length).map(([h, l]) => `<div class="group-head">${h}</div><div class="list">${l.map(row).join("")}</div>`).join("")
+    : `<p class="empty">${q ? "Nothing matches that search." : "Nothing in this category right now."}</p>`;
+  $("#feed-sub").textContent = `${state.wide ? "Île-de-France" : "Central Paris"} · updated ${ago(state.data.generated_at)}`;
 }
 
-function renderPlaces() {
-  const evs = events();
-  $("#places-list").innerHTML = state.places.length ? state.places.map((p) => {
-    const a = assess(p, evs);
-    return `<div class="place"><span class="dot ${a.level}"></span><div class="place-main"><div class="place-name">${esc(p.name)}</div><div class="place-why">${esc(a.why)}</div></div><button class="icon-btn" data-remove="${esc(p.id)}" aria-label="Remove ${esc(p.name)}">Remove</button></div>`;
-  }).join("") : `<p class="empty">Add your hotel first, then the places you'll visit.</p>`;
-  $("#gps-toggle").checked = !!state.gps;
+function renderToday() {
+  const today = new Date(), days = [];
+  for (let i = 0; i < 7; i++) days.push(dayKey(new Date(today.getTime() + i * 864e5)));
+  if (!state.day || !days.includes(state.day)) state.day = days[0];
+  $("#days").innerHTML = days.map((d, i) => `<button class="chip" data-day="${d}" aria-selected="${state.day === d}">${i === 0 ? "Today" : fDay.format(parisDate(d, "12:00"))}</button>`).join("");
+  $("#today-title").textContent = state.day === days[0] ? "Today" : fDay.format(parisDate(state.day, "12:00"));
+  const evs = events(), pe = parisEvents();
+  const dayStart = parisDate(state.day, "00:00").getTime(), dayEnd = dayStart + 864e5;
+  const onDay = (e) => e.status !== "ended" && (e.start ? +new Date(e.start) : 0) < dayEnd && (e.end ? +new Date(e.end) : Infinity) > dayStart;
+  const demos = pe.filter((e) => e.cat === "demo" && onDay(e)).length;
+  const strikes = pe.filter((e) => e.cat === "strike" && onDay(e));
+  $("#today-sub").textContent = state.data ? `${demos} demonstration notice${demos === 1 ? "" : "s"} · ${strikes.length} strike${strikes.length === 1 ? "" : "s"} in Paris` : "";
+  const strikeLines = [...new Set(strikes.flatMap((e) => e.lines || []))].slice(0, 8);
+  $("#today-banner").innerHTML = strikes.length ? `<div class="banner violet"><b>Strike notices${strikeLines.length ? `: ${esc(strikeLines.join(", "))}` : ""}</b><span>Expect reduced service. Check before travelling.</span></div>` : "";
+  const pts = watchPoints();
+  $("#places-list").innerHTML = pts.length ? pts.map((p) => placeRow(p, assess(p, evs))).join("") : '<p class="empty">Add your hotel first. It is checked all day, every day.</p>';
+  const stops = state.stops.filter((s) => s.date === state.day).sort((a, b) => a.time.localeCompare(b.time));
+  $("#stops-list").innerHTML = stops.length ? stops.map((s) => placeRow(s, assessAt(s, evs, parisDate(s.date, s.time)), s.time)).join("")
+    : '<p class="empty">Add where you plan to be and when. Each stop is checked for that time.</p>';
   const perm = "Notification" in window ? Notification.permission : "unsupported";
-  const btn = $("#alerts-btn");
-  btn.textContent = perm === "granted" ? "Alerts are on" : perm === "denied" ? "Alerts blocked in browser settings" : perm === "unsupported" ? "Alerts not supported here" : "Turn on alerts";
+  $("#alerts-toggle").checked = perm === "granted" && store.get("alerts", false);
+  $("#alerts-note").textContent = perm === "denied" ? "Blocked in browser settings" : perm === "unsupported" ? "Not supported in this browser" : "Notify me when a place or stop turns amber or red";
+  $("#gps-toggle").checked = !!state.gps;
 }
 
-function render() {
-  renderPlaque(); renderMap(); renderNow(); renderFeed(); renderPlaces(); checkAlerts();
+function renderHelp() {
+  const d = state.data;
+  $("#sources").innerHTML = d ? d.sources.map((s) => `<div class="src-row"><span>${esc(s.name)}</span><span class="${s.ok ? "" : "bad"}">${s.ok ? `${s.count} items` : "Unavailable"}</span></div>`).join("")
+    + `<div class="src-row"><span>Last update</span><span>${esc(ago(d.generated_at))}</span></div>` : '<p class="empty">No data yet.</p>';
 }
+
+function render() { renderStatus(); renderLayerChips(); renderMap(); renderSheet(); renderFeed(); renderToday(); renderHelp(); checkAlerts(); }
 
 /* ---------- detail ---------- */
 function showDetail(ev) {
+  const translated = !!(ev.title_en || ev.text_en), orig = !!state.original[ev.id];
+  const near = watchPoints().map((p) => { const n = nearestStop(ev, p); return n ? `${esc(p.name)} ${fmtDist(n.d)}` : ""; }).filter(Boolean).join(" · ");
+  const c = nearestStop(ev, PARIS) && (ev.stops && ev.stops.length ? ev.stops[Math.floor(ev.stops.length / 2)] : { lat: ev.lat, lon: ev.lon });
   const lines = (ev.lines || []).map(badge).join(" ");
-  const stops = (ev.stops || []).map((s) => s.n).join(", ");
-  const near = watchPoints().map((p) => { const n = nearestStop(ev, p); return n ? `${esc(p.name)}: ${fmtDist(n.d)}` : ""; }).filter(Boolean).join(" · ");
   $("#detail-body").innerHTML = `
-    <p class="kv"><span class="tag official">${esc(ev.src)}</span>${ev.sev ? esc(ev.sev) : ""}</p>
-    <h2 class="detail-title" id="detail-title">${esc(ev.title)}</h2>
-    ${lines ? `<p>${lines}</p>` : ""}
-    <p class="kv"><b>${esc(timing(ev))}</b>${ev.end && ev.status !== "active" ? ` · until ${esc(fmtTime(ev.end))}` : ""}</p>
-    ${near ? `<p class="kv">Distance: <b>${near}</b></p>` : ""}
-    ${stops ? `<p class="kv">Stops: ${esc(stops)}</p>` : ""}
+    <div class="pills"><span class="pill ${ev.cat}">${esc((CAT[ev.cat] || CAT.road).label)}</span><span class="pill">${esc(ev.src)}</span>${ev.sev ? `<span class="pill">${esc(ev.sev)}</span>` : ""}</div>
+    <h2 class="detail-title" id="detail-title">${esc(headline(ev))}</h2>
+    ${headline(ev) !== titleOf(ev) ? `<p class="detail-meta" style="margin-top:-2px">${esc(titleOf(ev))}</p>` : ""}
+    <p class="detail-meta"><b>${esc(timing(ev))}</b>${ev.end && ev.status !== "active" ? ` · until ${esc(when(ev.end))}` : ""}${near ? ` · ${near}` : ""}</p>
+    ${lines ? `<p class="ev-lines" style="margin:0 0 12px">${lines}</p>` : ""}
+    ${textOf(ev) ? `<div class="msg">${translated ? `<p class="msg-note"><span>${orig ? "Original French" : "Translated from French"}</span><button id="toggle-orig">${orig ? "Show English" : "Show original"}</button></p>` : ""}${esc(textOf(ev))}</div>` : ""}
     ${ev.why ? `<p class="kv">Flagged because the operator wrote <b>“${esc(ev.why)}”</b></p>` : ""}
-    ${ev.text ? `<div class="detail-text"${ev.lang === "fr" ? ' lang="fr"' : ""}>${esc(ev.text)}</div>` : ""}
-    <p class="kv">${ev.updated ? `Notice updated ${esc(fmtTime(ev.updated))} · ` : ""}All times Paris time</p>
-    <div class="row"><button class="btn" id="detail-map">Show on map</button>${ev.url ? `<a class="btn" style="text-align:center;text-decoration:none" href="${esc(ev.url)}" target="_blank" rel="noopener">Official source</a>` : ""}</div>`;
+    ${ev.stops && ev.stops.length ? `<p class="kv">Stops: <b>${esc(ev.stops.map((s) => s.n).join(", "))}</b></p>` : ""}
+    <p class="kv">${ev.updated ? `Notice updated ${esc(when(ev.updated))} · ` : ""}All times Paris time</p>
+    <div class="row-2"><button class="btn" id="d-map">Show on map</button>${c && c.lat != null ? `<a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lon}">Google Maps</a>` : ""}</div>
+    ${ev.url ? `<a class="btn btn-wide" target="_blank" rel="noopener" href="${esc(ev.url)}">Official source</a>` : ""}`;
   $("#detail").hidden = false;
-  $("#detail-map").onclick = () => {
-    $("#detail").hidden = true; switchView("now");
-    const pts = (ev.stops || []).map((s) => [s.lat, s.lon]).concat(ev.pts || []);
-    if (pts.length) map.fitBounds(pts, { padding: [60, 60], maxZoom: 16 });
+  const t = $("#toggle-orig"); if (t) t.onclick = () => { state.original[ev.id] = !state.original[ev.id]; showDetail(ev); };
+  $("#d-map").onclick = () => {
+    $("#detail").hidden = true; switchView("map"); setSnap("peek");
+    fitTo((ev.stops && ev.stops.length ? ev.stops : []).concat((ev.pts || []).map(([lat, lon]) => ({ lat, lon }))).concat(ev.lat != null && !(ev.stops || []).length ? [{ lat: ev.lat, lon: ev.lon }] : []));
   };
 }
 
-/* ---------- places ---------- */
-function savePlaces() { store.set("places", state.places); render(); }
-function addPlace(lat, lon) {
-  const name = $("#place-name").value.trim() || `Place ${state.places.length + 1}`;
-  state.places.push({ id: String(Date.now()), name, lat, lon });
-  $("#place-name").value = ""; $("#place-error").hidden = true; savePlaces();
+/* ---------- add place / stop ---------- */
+function openAdd() {
+  state.chosen = null; $("#add-query").value = ""; $("#add-results").innerHTML = ""; $("#add-chosen").hidden = true; $("#add-error").hidden = true;
+  $("#add").hidden = false; setTimeout(() => $("#add-query").focus(), 100);
 }
-function placeError(msg) { const e = $("#place-error"); e.textContent = msg; e.hidden = false; }
-function finishPick(latlng) {
+function choose(place) {
+  state.chosen = place; $("#add-chosen").hidden = false; $("#add-results").innerHTML = "";
+  $("#add-name").value = place.name || ""; $("#add-error").hidden = true;
+}
+let searchTimer = null, searchSeq = 0;
+function search(q) {
+  clearTimeout(searchTimer);
+  if (q.trim().length < 3) { $("#add-results").innerHTML = ""; return; }
+  searchTimer = setTimeout(async () => {
+    const seq = ++searchSeq;
+    try {
+      const url = `${PHOTON}?q=${encodeURIComponent(q)}&lat=${PARIS.lat}&lon=${PARIS.lon}&limit=6&lang=en`;
+      const res = await fetch(url); if (!res.ok) throw new Error();
+      const data = await res.json(); if (seq !== searchSeq) return;
+      const items = (data.features || []).map((f) => {
+        const p = f.properties || {}, [lon, lat] = f.geometry.coordinates;
+        const name = p.name || [p.housenumber, p.street].filter(Boolean).join(" ") || "Place";
+        const sub = [p.street && p.name ? p.street : "", p.postcode, p.city].filter(Boolean).join(", ");
+        return { name, sub, lat, lon };
+      });
+      state.results = items;
+      $("#add-results").innerHTML = items.length ? items.map((it, i) => `<button class="ev" data-result="${i}"><span class="ev-main"><span class="ev-title">${esc(it.name)}</span><span class="ev-meta">${esc(it.sub)}</span></span></button>`).join("")
+        : '<p class="empty">No matches. Try Pick on map.</p>';
+    } catch { if (seq === searchSeq) $("#add-results").innerHTML = '<p class="empty">Search isn\'t reachable right now. Use Pick on map.</p>'; }
+  }, 400);
+}
+function saveChosen() {
+  const c = state.chosen; if (!c) return;
+  const name = $("#add-name").value.trim() || c.name || "Place";
+  const kind = document.querySelector('input[name="when"]:checked').value;
+  const item = { id: String(Date.now()), name: name.slice(0, 40), lat: +(+c.lat).toFixed(5), lon: +(+c.lon).toFixed(5) };
+  if (kind === "stop") { state.stops.push({ ...item, date: state.day || dayKey(new Date()), time: $("#add-time").value || "10:00" }); store.set("stops", state.stops); }
+  else { state.places.push(item); store.set("places", state.places); }
+  $("#add").hidden = true; render();
+}
+function finishPick(pt) {
   state.picking = false; $("#pick-hint").hidden = true;
-  addPlace(+latlng.lat.toFixed(5), +latlng.lng.toFixed(5)); switchView("places");
+  switchView("today"); $("#add").hidden = false; choose({ name: "", ...pt }); $("#add-name").focus();
 }
 
+/* ---------- location ---------- */
 let watchId = null;
 function startGps() {
   if (!navigator.geolocation) return;
-  watchId = navigator.geolocation.watchPosition((p) => { state.me = { lat: p.coords.latitude, lon: p.coords.longitude }; render(); },
-    () => { state.me = null; }, { enableHighAccuracy: false, maximumAge: 60000, timeout: 20000 });
+  watchId = navigator.geolocation.watchPosition((p) => { state.me = { lat: p.coords.latitude, lon: p.coords.longitude }; render(); }, () => { state.me = null; }, { maximumAge: 60000, timeout: 20000 });
 }
 
-/* ---------- alerts (system notifications while the app is open or recently used) ---------- */
+/* ---------- alerts: system notifications while the app is open or recently used ---------- */
 async function checkAlerts() {
   if (!state.data || minutesSince(state.data.generated_at) > DEAD_MIN) return;
   const evs = events(), now = {}, worse = [];
-  for (const p of watchPoints()) {
-    const a = assess(p, evs); now[p.id] = a.level;
-    const before = state.lastLevels[p.id] || "green";
-    if (LEVELS.indexOf(a.level) > LEVELS.indexOf(before)) worse.push({ p, a });
-  }
+  for (const p of watchPoints()) { const a = assess(p, evs); now[p.id] = a.level; if (LEVELS.indexOf(a.level) > LEVELS.indexOf(state.lastLevels[p.id] || "green")) worse.push({ name: p.name, a }); }
+  for (const s of upcomingStops()) { const a = assessAt(s, evs, s.at); const k = `stop-${s.id}`; now[k] = a.level; if (LEVELS.indexOf(a.level) > LEVELS.indexOf(state.lastLevels[k] || "green")) worse.push({ name: `${s.name} at ${s.time}`, a }); }
   state.lastLevels = now; store.set("lastLevels", now);
-  if (!worse.length || !("Notification" in window) || Notification.permission !== "granted") return;
+  if (worse.some((w) => w.a.level === "red")) navigator.vibrate?.([250, 100, 250]);
+  if (!worse.length || !store.get("alerts", false) || !("Notification" in window) || Notification.permission !== "granted") return;
   const reg = await navigator.serviceWorker?.getRegistration();
-  for (const { p, a } of worse) {
-    const title = `${a.level === "red" ? "Red" : "Amber"} near ${p.name}`;
-    const opts = { body: a.why, tag: `place-${p.id}`, renotify: true, icon: "icons/icon-192.png", vibrate: a.level === "red" ? [300, 120, 300] : [200] };
+  for (const { name, a } of worse) {
+    const title = a.level === "red" ? `Demonstration near ${name}` : `Watch out near ${name}`;
+    const opts = { body: a.why, tag: `pulse-${name}`, renotify: true, icon: "icons/icon-192.png" };
     try { reg ? reg.showNotification(title, opts) : new Notification(title, opts); } catch { /* ignore */ }
   }
 }
@@ -382,58 +508,77 @@ async function checkAlerts() {
 function switchView(name) {
   document.querySelectorAll(".view").forEach((v) => (v.hidden = v.id !== `view-${name}`));
   document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
-  if (name === "now" && map) setTimeout(() => map.invalidateSize(), 50);
+  if (name === "map" && map) setTimeout(() => map.resize(), 30);
 }
-
+function bindPullToRefresh() {
+  const page = $("#feed-page"), ptr = $("#ptr"); let y0 = null;
+  page.addEventListener("touchstart", (e) => { y0 = page.scrollTop <= 0 ? e.touches[0].clientY : null; }, { passive: true });
+  page.addEventListener("touchmove", (e) => { if (y0 != null) ptr.classList.toggle("show", e.touches[0].clientY - y0 > 70); }, { passive: true });
+  page.addEventListener("touchend", () => { if (ptr.classList.contains("show")) { ptr.textContent = "Refreshing…"; load().then(() => { ptr.classList.remove("show"); ptr.textContent = "Release to refresh"; }); } y0 = null; });
+}
 function bind() {
   document.querySelectorAll(".tabs button").forEach((b) => (b.onclick = () => switchView(b.dataset.view)));
-  $("#plaque").onclick = () => { switchView("now"); load(); };
-  $("#sheet-handle").onclick = () => { const s = $("#sheet"); s.dataset.state = s.dataset.state === "peek" ? "full" : "peek"; };
-  $("#layers").onclick = (e) => {
-    const k = e.target.closest("[data-layer]")?.dataset.layer; if (!k) return;
-    state.layers[k] = !state.layers[k]; store.set("layers", state.layers); renderLayerChips(); renderMap();
+  $("#status").onclick = () => { const c = $("#status")._cause; if (c) showDetail(c); else { switchView("map"); setSnap("half"); } };
+  $("#layers").onclick = (e) => { const k = e.target.closest("[data-layer]")?.dataset.layer; if (!k) return; state.layers[k] = !state.layers[k]; store.set("layers2", state.layers); renderLayerChips(); renderMap(); };
+  $("#locate").onclick = () => {
+    if (state.me) return fitTo([state.me]);
+    navigator.geolocation?.getCurrentPosition((p) => { state.me = { lat: p.coords.latitude, lon: p.coords.longitude }; fitTo([state.me]); renderMap(); }, () => fitTo(state.places.length ? state.places : [PARIS]));
   };
   $("#feed-filters").onclick = (e) => {
-    if (e.target.closest("[data-wide]")) { state.wideArea = !state.wideArea; return renderFeed(); }
+    if (e.target.closest("[data-wide]")) { state.wide = !state.wide; return renderFeed(); }
     const k = e.target.closest("[data-filter]")?.dataset.filter; if (k) { state.feedFilter = k; renderFeed(); }
   };
+  $("#feed-search").oninput = (e) => { state.feedQuery = e.target.value; renderFeed(); };
+  $("#days").onclick = (e) => { const d = e.target.closest("[data-day]")?.dataset.day; if (d) { state.day = d; renderToday(); } };
   document.addEventListener("click", (e) => {
     const evEl = e.target.closest(".ev[data-id]");
-    if (evEl) { const ev = events().find((x) => x.id === evEl.dataset.id); if (ev) showDetail(ev); }
+    if (evEl) { const ev = events().find((x) => x.id === evEl.dataset.id); if (ev) showDetail(ev); return; }
     const rm = e.target.closest("[data-remove]");
-    if (rm) { state.places = state.places.filter((p) => p.id !== rm.dataset.remove); savePlaces(); }
+    if (rm) {
+      e.stopPropagation(); const id = rm.dataset.remove;
+      state.places = state.places.filter((p) => p.id !== id); state.stops = state.stops.filter((s) => s.id !== id);
+      store.set("places", state.places); store.set("stops", state.stops); return render();
+    }
+    const pl = e.target.closest(".place[data-place]");
+    if (pl && pl.closest("#sheet-body")) { const p = watchPoints().find((x) => x.id === pl.dataset.place); if (p) { fitTo([p]); setSnap("peek"); } }
+    const r = e.target.closest("[data-result]"); if (r) choose(state.results[+r.dataset.result]);
   });
   $("#detail-close").onclick = () => ($("#detail").hidden = true);
   $("#detail").onclick = (e) => { if (e.target.id === "detail") $("#detail").hidden = true; };
+  $("#add-open").onclick = openAdd;
+  $("#add-close").onclick = () => ($("#add").hidden = true);
+  $("#add").onclick = (e) => { if (e.target.id === "add") $("#add").hidden = true; };
+  $("#add-query").oninput = (e) => search(e.target.value);
   $("#add-here").onclick = () => {
-    if (!navigator.geolocation) return placeError("This browser can't share your location. Use Pick on map.");
-    navigator.geolocation.getCurrentPosition((p) => addPlace(+p.coords.latitude.toFixed(5), +p.coords.longitude.toFixed(5)),
-      () => placeError("Location permission was refused. Use Pick on map instead."), { timeout: 15000 });
+    if (!navigator.geolocation) { $("#add-error").textContent = "This browser can't share your location. Use Pick on map."; $("#add-error").hidden = false; return; }
+    navigator.geolocation.getCurrentPosition((p) => choose({ name: "", lat: p.coords.latitude, lon: p.coords.longitude }),
+      () => { $("#add-error").textContent = "Location permission was refused. Use Pick on map."; $("#add-error").hidden = false; }, { timeout: 15000 });
   };
-  $("#add-pick").onclick = () => { state.picking = true; switchView("now"); $("#pick-hint").hidden = false; $("#sheet").dataset.state = "peek"; };
-  $("#alerts-btn").onclick = async () => { if ("Notification" in window && Notification.permission === "default") await Notification.requestPermission(); renderPlaces(); };
+  $("#add-pick").onclick = () => { $("#add").hidden = true; state.picking = true; switchView("map"); setSnap("peek"); $("#pick-hint").hidden = false; };
+  $("#pick-cancel").onclick = (e) => { e.stopPropagation(); state.picking = false; $("#pick-hint").hidden = true; };
+  document.querySelectorAll('input[name="when"]').forEach((r) => (r.onchange = () => ($("#add-time").hidden = r.value !== "stop" || !r.checked)));
+  $("#add-save").onclick = saveChosen;
+  $("#alerts-toggle").onchange = async (e) => {
+    if (e.target.checked && "Notification" in window && Notification.permission === "default") await Notification.requestPermission();
+    store.set("alerts", e.target.checked && "Notification" in window && Notification.permission === "granted"); renderToday();
+  };
   $("#gps-toggle").onchange = (e) => {
     state.gps = e.target.checked; store.set("gps", state.gps);
     if (state.gps) startGps(); else { if (watchId != null) navigator.geolocation.clearWatch(watchId); state.me = null; }
     render();
   };
-  for (const id of ["hotel-address", "meeting-point", "embassy"]) {
-    const el = $(`#${id}`); el.value = store.get(id, ""); el.oninput = () => store.set(id, el.value);
-  }
+  for (const id of ["hotel-address", "meeting-point", "embassy"]) { const el = $(`#${id}`); el.value = store.get(id, ""); el.oninput = () => store.set(id, el.value); }
   $("#show-taxi").onclick = () => { $("#taxi-text").textContent = $("#hotel-address").value || "Add the hotel address first."; $("#taxi").hidden = false; };
   $("#taxi-close").onclick = () => ($("#taxi").hidden = true);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { $("#detail").hidden = true; $("#add").hidden = true; $("#taxi").hidden = true; } });
 }
 
-/* ---------- start ---------- */
 window.addEventListener("DOMContentLoaded", () => {
-  bind(); renderLayerChips();
-  const top = document.querySelector(".top");
-  const setTop = () => document.documentElement.style.setProperty("--top-h", `${Math.ceil(top.getBoundingClientRect().height)}px`);
-  if ("ResizeObserver" in window) new ResizeObserver(setTop).observe(top); else setTop();
-  if (window.L) initMap(); else $("#map").innerHTML = '<p class="empty" style="padding:120px 16px">The map could not load. The lists below still work.</p>';
+  bind(); bindSheet(); bindPullToRefresh(); initMap();
   if (state.gps) startGps();
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
-  load(); setInterval(() => { if (document.visibilityState === "visible") load(); }, REFRESH_MS);
-  setInterval(renderPlaque, 30000);
+  render(); load();
+  setInterval(() => { if (document.visibilityState === "visible") load(); }, REFRESH_MS);
+  setInterval(renderStatus, 30000);
 });

@@ -65,6 +65,6 @@ def test_one_failed_source_keeps_the_other():
 def test_main_writes_file(tmp_path):
     target = tmp_path / "data.json"
     with mock.patch("requests.get", fake_get()), mock.patch.dict("os.environ", {"PRIM_API_KEY": "k"}):
-        assert collect.main(["--out", str(target)]) == 0
+        assert collect.main(["--out", str(target), "--no-translate"]) == 0
     data = json.loads(target.read_text(encoding="utf-8"))
     assert data["generated_at"] and data["events"]

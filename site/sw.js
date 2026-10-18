@@ -1,8 +1,8 @@
 /* Service worker: keeps the app shell and the last data.json available offline. */
-const SHELL = "pulse-shell-v2";
+const SHELL = "pulse-shell-v3";
 const DATA = "pulse-data";
 const SHELL_FILES = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
-  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"];
+  "https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css", "https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll(SHELL_FILES)).then(() => self.skipWaiting()));
@@ -25,7 +25,7 @@ self.addEventListener("fetch", (e) => {
     }).catch(() => caches.open(DATA).then((c) => c.match("data.json")).then((r) => r || Response.error())));
     return;
   }
-  if (url.hostname.endsWith("tile.openstreetmap.org")) return;   // map tiles: let the browser cache them
+  if (url.hostname.endsWith("openfreemap.org") || url.hostname.endsWith("photon.komoot.io")) return;   // map tiles and search: straight to the network
   if (url.origin === location.origin) {
     // The app's own files: network first so updates appear immediately; cache when offline.
     e.respondWith(fetch(e.request).then((res) => {
