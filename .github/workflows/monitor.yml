@@ -1,5 +1,5 @@
 name: Paris safety monitor
-
+# Scheduled Paris safety monitoring
 on:
   workflow_dispatch:
   schedule:
