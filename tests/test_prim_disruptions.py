@@ -107,3 +107,16 @@ def test_fetch_reports_bad_key_without_revealing_it():
 def test_fetch_requires_key():
     with pytest.raises(ValueError):
         prim.fetch("", NOW)
+
+
+def test_demonstration_and_strike_are_separate_kinds():
+    assert prim.protest_kind("Reason: demonstration.") == "demonstration"
+    assert prim.protest_kind("Motif : manifestation") == "demonstration"
+    assert prim.protest_kind("Tramway T14 - Social movement") == "strike"
+    assert prim.protest_kind("en raison d'une grève") == "strike"
+
+
+def test_place_names_do_not_trigger_alerts():
+    # A real false alarm from the sample: a stop called "Les Grèves" on a roadworks notice.
+    assert prim.protest_kind("WORKS - the Les Grèves stops are not served") is None
+    assert prim.protest_kind("Place de la Manifestation closed for works") is None

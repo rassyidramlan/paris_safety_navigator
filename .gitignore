@@ -4,3 +4,5 @@ __pycache__/
 .streamlit/secrets.toml
 data/*
 !data/sent_hashes.json
+!data/idfm_stops.json
+site/data.json

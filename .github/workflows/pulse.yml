@@ -1,0 +1,58 @@
+name: Paris Pulse — collect and publish
+
+# Fetches the official feeds, writes site/data.json and publishes the app to GitHub Pages.
+# Triggers: every 10 minutes (best effort; an external timer can also call workflow_dispatch),
+# by hand, and whenever the app or collector code changes on main.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "4,14,24,34,44,54 * * * *"
+  push:
+    branches: [main]
+    paths: ["site/**", "collect.py", "prim_disruptions.py", "paris_open_data.py", "sources.json", "data/idfm_stops.json", ".github/workflows/pulse.yml"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One publish at a time; a newer run waits rather than cancelling a deploy halfway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Record what triggered this run
+        run: |
+          echo "### Paris Pulse run" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Triggered by: **${{ github.event_name }}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Started (UTC): $(date -u '+%Y-%m-%d %H:%M:%S')" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install collector dependencies
+        run: pip install "requests>=2.32"
+      - name: Collect official feeds
+        env:
+          PRIM_API_KEY: ${{ secrets.PRIM_API_KEY }}
+        run: python collect.py --out site/data.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,9 +1,8 @@
-name: Paris safety monitor
-# Scheduled Paris safety monitoring
+name: Paris safety monitor (Telegram, retired)
+# Retired: the Paris Pulse app (pulse.yml) replaces Telegram alerts.
+# Kept as a manual button only; no schedule.
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "13,28,43,58 * * * *"
 
 permissions:
   contents: write
