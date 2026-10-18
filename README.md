@@ -1,85 +1,57 @@
-# Paris Protest & Safety Navigator (MVP)
+# Paris Pulse
 
-A personal, cloud-hosted dashboard for Paris travel planning. It combines:
-- Paris Open Data traffic-event records (when available)
-- Optional RSS feeds that you configure
-- Clear source timestamps and freshness labels
-- A cautious, rule-based risk flag (not a prediction of violence)
-- Telegram notifications from a scheduled GitHub Actions job
+A personal phone app for situational awareness in Paris: where demonstrations are affecting the city right now, which Métro/RER lines are disrupted, and whether any of that is close to the places you care about.
 
-**Important:** This MVP does not have privileged police data and cannot reliably predict the exact location or violence level of protests. A missing alert does not mean an area is safe. Confirm important decisions with official authorities, transport operators and current local reporting.
+It is a personal tool, not an emergency service. In danger, call **112**.
 
-## What is included
-- `app.py`: mobile-friendly Streamlit dashboard with a map and event list
-- `monitor.py`: fetches configured sources and sends Telegram alerts for new matching items
-- `.github/workflows/monitor.yml`: runs the monitor on a schedule
-- `sources.json`: source configuration
-- `.env.example`: local secrets template
+## How it works
 
-## 1. Create the Telegram bot
-1. In Telegram, open `@BotFather`.
-2. Send `/newbot` and follow the instructions.
-3. Copy the bot token somewhere private.
-4. Open your new bot and press **Start**.
-5. To get your chat ID, send a message to the bot, then open this URL in a browser (replace `BOT_TOKEN`):
-   `https://api.telegram.org/botBOT_TOKEN/getUpdates`
-6. Find `message.chat.id` in the response. Do not share the token or publish it in code.
-
-If `getUpdates` is empty, send another message to the bot and refresh the URL.
-
-## 2. Put the project on GitHub
-1. Create a private repository on GitHub, for example `paris-safety-navigator`.
-2. Upload all files from this folder, including the `.github/workflows` directory.
-3. In the repository, open **Settings → Secrets and variables → Actions → New repository secret**.
-4. Add:
-   - `TELEGRAM_BOT_TOKEN`
-   - `TELEGRAM_CHAT_ID`
-5. Open **Actions** and enable workflows if GitHub asks.
-
-The scheduled monitor runs every 15 minutes. GitHub scheduled jobs are best-effort and may be delayed. You can also run it manually from Actions → Paris safety monitor → Run workflow.
-
-## 3. Deploy the dashboard to Streamlit Community Cloud
-1. Visit https://share.streamlit.io/ and sign in with GitHub.
-2. Choose **Create app**, select your private repository, branch, and `app.py`.
-3. If the service requires repository access or a plan change for a private repo, follow the current Streamlit instructions. You can instead use a public repo, but never place secrets in it.
-4. Open the app's **Settings / Secrets** area and add:
-   ```toml
-   TELEGRAM_BOT_TOKEN = "your-token"
-   TELEGRAM_CHAT_ID = "your-chat-id"
-   ```
-   The dashboard itself does not need Telegram credentials to display events; these are primarily used by the monitor.
-5. Open the deployed URL on your Android phone and use **Add to Home screen** in your browser.
-
-## 4. Run locally (optional)
-Requires Python 3.11 or newer.
-```bash
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
-pip install -r requirements.txt
-streamlit run app.py
+```
+Official feeds ──► collect.py (GitHub Actions, every ~10 min) ──► site/data.json ──► GitHub Pages
+                                                                                      │
+                                                    phone: Paris Pulse web app ◄──────┘
+                                                    (works out red / amber / green for your places on the phone)
 ```
 
-To test Telegram delivery locally:
+- **`collect.py`** fetches the sources, puts transport notices on the map using IDFM stop coordinates, and writes `site/data.json`. Secrets are read from environment variables and never written to the output.
+- **`site/`** is the app: `index.html`, `style.css`, `app.js`, a service worker for offline use, and a manifest so it installs to the home screen.
+- **Your places stay on your phone** (browser storage). They are never sent anywhere.
+
+## Sources
+
+| Source | What it gives | Access |
+|---|---|---|
+| Île-de-France Mobilités — PRIM *Traffic Info Messages* | Official Métro, RER, tram, bus notices, including when the operator gives a demonstration or strike as the reason | Free token, secret `PRIM_API_KEY`; Mobility License |
+| Île-de-France Mobilités — *Référentiel des arrêts* | Stop coordinates (`data/idfm_stops.json`) | Licence Ouverte 2.0 |
+| Paris Open Data — `circulation_evenement` | Road works and closures | Open data |
+| Map tiles | © OpenStreetMap contributors, © CARTO | Free tier |
+
+## Status colours
+
+- **Red** — an operator notice cites a demonstration within 500 m of a place, now or in the next 2 hours.
+- **Amber** — the same within 2 km, a demonstration within 1 km later today, or a Métro/RER line blocked within 500 m.
+- **Green** — nothing like that in the feeds. Feeds can miss things.
+
+Strikes are listed and mapped separately and don't turn places red: they affect transport, not street safety.
+
+## Setup
+
+1. Repo **Settings → Secrets and variables → Actions**: add `PRIM_API_KEY`.
+2. Repo **Settings → Pages → Build and deployment → Source: GitHub Actions** (needs the repo to be public on the free plan).
+3. **Actions → Paris Pulse — collect and publish → Run workflow**. The app appears at `https://<user>.github.io/paris_safety_navigator/`.
+4. Scheduled runs are best effort. For reliable 10-minute updates, have an external timer (e.g. cron-job.org) call the workflow's `dispatches` API with a fine-grained token limited to Actions on this repo.
+
+## Development
+
 ```bash
-# Windows PowerShell:
-$env:TELEGRAM_BOT_TOKEN="your-token"
-$env:TELEGRAM_CHAT_ID="your-chat-id"
-python monitor.py
+pip install -r requirements.txt pytest
+python -m pytest -q                      # tests use saved samples, never live calls
+PRIM_API_KEY=... python collect.py       # writes site/data.json
+python -m http.server -d site 8000       # open http://localhost:8000
 ```
 
-## Sources and limitations
-- Paris Open Data endpoint configured in `sources.json` is a general traffic-event dataset, not a dedicated protest feed. It may contain road events, works or closures rather than protest reports.
-- RSS sources are optional and intentionally left unconfigured until you choose feeds you trust. Add only feeds that are publicly accessible and whose terms permit automated access.
-- The MVP's risk flag is a transparent keyword heuristic. It is not machine learning, not a verified danger score, and not a guarantee of safety.
-- This app does not continuously track your GPS location. It only uses places you enter manually.
-- Respect source terms, API limits and copyright. The app stores only a short event summary and source URL.
+On Windows PowerShell: `$env:PRIM_API_KEY="..."` before `python collect.py`.
 
-## Recommended next improvements
-1. Add official RATP / Île-de-France Mobilités feeds or API access after confirming their current API terms and credentials.
-2. Add a geocoding step with a permitted provider to map RSS items with place names.
-3. Add manual confirmation and duplicate detection for reports.
-4. Add route checks using a routing provider with live closure data where available.
-5. Test alert quality for a week before relying on it during travel.
+## Older files
+
+`app.py` (Streamlit dashboard) and `monitor.py` (Telegram alerts) are the first prototype. They still work but are no longer the main app; `monitor.yml` no longer runs on a schedule.

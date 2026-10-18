@@ -46,11 +46,29 @@ SEVERITY_LABELS = {"BLOQUANTE": "Blocking", "PERTURBEE": "Disrupted", "INFORMATI
 CAUSE_LABELS = {"TRAVAUX": "Planned works", "PERTURBATION": "Disruption", "INFORMATION": "Information"}
 
 # Words operators use when a demonstration or strike is the stated reason.
-PROTEST_PATTERN = re.compile(
-    r"\b(demonstrations?|manifestations?|rassemblements?|strikes?|grèves?|greves?|"
-    r"social movement|mouvement social|protests?)\b",
-    re.IGNORECASE,
-)
+# English words match in any case; French words only in lowercase, so stop names
+# such as "Les Grèves" or "Place de la Manifestation" don't trigger a match.
+DEMO_PATTERN = re.compile(r"\b(?i:demonstrations?|protests?|rall(?:y|ies))\b|\b(?:manifestations?|rassemblements?|manifestants?)\b")
+STRIKE_PATTERN = re.compile(r"\b(?i:strikes?|social movements?|industrial action)\b|\b(?:grèves?|greves?|mouvements? sociaux|mouvement social|préavis)\b")
+
+
+def protest_kind(text):
+    """'demonstration', 'strike' or None for an operator message."""
+    if DEMO_PATTERN.search(text):
+        return "demonstration"
+    if STRIKE_PATTERN.search(text):
+        return "strike"
+    return None
+
+
+# Kept for compatibility: matches either kind.
+class _Either:
+    @staticmethod
+    def search(text):
+        return protest_kind(text) is not None
+
+
+PROTEST_PATTERN = _Either()
 
 
 def parse_local(value):
@@ -93,18 +111,22 @@ def period_status(periods, now):
 
 
 def index_lines(lines):
-    """disruption id -> {"lines": [(mode, shortName)], "stops": [names]}"""
+    """disruption id -> {"lines": [(mode, shortName)], "stops": [names], "stop_refs": [(id, name)]}"""
     index = {}
     for line in lines or []:
         mode = line.get("mode")
         short = line.get("shortName") or line.get("name") or "?"
         for obj in line.get("impactedObjects") or []:
             for did in obj.get("disruptionIds") or []:
-                entry = index.setdefault(did, {"lines": [], "stops": []})
+                entry = index.setdefault(did, {"lines": [], "stops": [], "stop_refs": []})
                 if (mode, short) not in entry["lines"]:
                     entry["lines"].append((mode, short))
-                if obj.get("type") == "stop_point" and obj.get("name") and obj["name"] not in entry["stops"]:
-                    entry["stops"].append(obj["name"])
+                if obj.get("type") == "stop_point" and obj.get("name"):
+                    if obj["name"] not in entry["stops"]:
+                        entry["stops"].append(obj["name"])
+                    ref = (obj.get("id"), obj["name"])
+                    if ref[0] and ref not in entry["stop_refs"]:
+                        entry["stop_refs"].append(ref)
     return index
 
 
@@ -136,7 +158,10 @@ def normalise(disruption, impacted, now):
         "is_rail": any(m in RAIL_MODES for m, _ in lines),
         "is_bus": any(m == "Bus" for m, _ in lines),
         "stops": impacted.get("stops", [])[:20],
-        "protest_related": bool(PROTEST_PATTERN.search(title + " " + message)),
+        "stop_refs": impacted.get("stop_refs", [])[:40],
+        "modes": sorted({m for m, _ in lines if m}),
+        "protest_kind": protest_kind(title + " " + message),
+        "protest_related": protest_kind(title + " " + message) is not None,
         "points": [],
         "lat": None,
         "lon": None,

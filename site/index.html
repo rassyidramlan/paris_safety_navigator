@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14305e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Paris Pulse</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <button class="plaque" id="plaque" data-level="loading" aria-live="polite">
+    <span class="plaque-inner">
+      <span class="plaque-title" id="plaque-title">Loading…</span>
+      <span class="plaque-sub" id="plaque-sub">Checking official feeds</span>
+    </span>
+    <span class="plaque-age" id="plaque-age"></span>
+  </button>
+</header>
+
+<main>
+  <section class="view" id="view-now" aria-label="Now">
+    <div id="map" role="application" aria-label="Map of Paris"></div>
+    <div class="layers" id="layers" aria-label="Map layers"></div>
+    <div class="pick-hint" id="pick-hint" hidden>Tap the map to place it</div>
+    <div class="sheet" id="sheet" data-state="peek">
+      <button class="sheet-handle" id="sheet-handle" aria-label="Expand list"><span></span></button>
+      <div class="sheet-body" id="now-body"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-feed" aria-label="Feed" hidden>
+    <div class="page">
+      <h1>Feed</h1>
+      <div class="chips" id="feed-filters" role="tablist"></div>
+      <div id="feed-list"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-places" aria-label="Places" hidden>
+    <div class="page">
+      <h1>Your places</h1>
+      <p class="lede">Status is worked out on this phone. Your places never leave it.</p>
+      <div id="places-list"></div>
+      <div class="add-place">
+        <input id="place-name" type="text" placeholder="Hotel, Louvre, school pickup" maxlength="40" aria-label="Place name">
+        <div class="row">
+          <button class="btn" id="add-here">Use my location</button>
+          <button class="btn" id="add-pick">Pick on map</button>
+        </div>
+        <p class="error" id="place-error" hidden></p>
+      </div>
+      <h2>Alerts</h2>
+      <p class="lede">Get a phone notification when one of your places turns amber or red. Works while the app is open or recently used.</p>
+      <button class="btn btn-strong" id="alerts-btn">Turn on alerts</button>
+      <label class="toggle"><input type="checkbox" id="gps-toggle"> Also check around my current position</label>
+      <h2>How the colours work</h2>
+      <dl class="rules">
+        <dt class="r">Red</dt><dd>An operator notice cites a demonstration or strike within 500 m of a place, now or in the next 2 hours.</dd>
+        <dt class="a">Amber</dt><dd>The same within 2 km, a demonstration within 1 km later today, or a Métro/RER line blocked within 500 m.</dd>
+        <dt class="g">Green</dt><dd>Nothing like that in the feeds right now. Feeds can miss things, so stay alert.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="view" id="view-sos" aria-label="SOS" hidden>
+    <div class="page">
+      <h1>SOS</h1>
+      <div class="sos-grid">
+        <a class="sos" href="tel:112"><b>112</b><span>Any emergency</span></a>
+        <a class="sos" href="tel:17"><b>17</b><span>Police</span></a>
+        <a class="sos" href="tel:15"><b>15</b><span>Medical (SAMU)</span></a>
+        <a class="sos" href="tel:18"><b>18</b><span>Fire brigade</span></a>
+      </div>
+      <p class="lede">114 is the emergency number by SMS for people who can't speak.</p>
+      <h2>For the taxi</h2>
+      <textarea id="hotel-address" rows="3" placeholder="Hotel name and full address"></textarea>
+      <button class="btn btn-strong" id="show-taxi">Show to driver</button>
+      <h2>Family meeting point</h2>
+      <textarea id="meeting-point" rows="2" placeholder="If we get separated, meet at…"></textarea>
+      <h2>Embassy of Malaysia</h2>
+      <textarea id="embassy" rows="3" placeholder="Copy the address and phone number from kln.gov.my"></textarea>
+      <a class="link" href="https://www.kln.gov.my/web/guest/overseas-missions" target="_blank" rel="noopener">Find it on the official missions list</a>
+      <h2>Official live sources</h2>
+      <ul class="links">
+        <li><a href="https://www.iledefrance-mobilites.fr/" target="_blank" rel="noopener">Île-de-France Mobilités</a></li>
+        <li><a href="https://www.ratp.fr/" target="_blank" rel="noopener">RATP</a></li>
+        <li><a href="https://www.prefecturedepolice.interieur.gouv.fr/" target="_blank" rel="noopener">Préfecture de Police de Paris</a></li>
+      </ul>
+      <p class="lede">Notes saved here stay on this phone and work offline.</p>
+    </div>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Main">
+  <button data-view="now" class="active"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Now</button>
+  <button data-view="feed"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Feed</button>
+  <button data-view="places"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Places</button>
+  <button data-view="sos" class="sos-tab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg>SOS</button>
+</nav>
+
+<div class="modal" id="detail" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <button class="close" id="detail-close" aria-label="Close">×</button>
+    <div id="detail-body"></div>
+  </div>
+</div>
+
+<div class="taxi" id="taxi" hidden>
+  <p id="taxi-text"></p>
+  <button class="btn" id="taxi-close">Close</button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="app.js"></script>
+</body>
+</html>
