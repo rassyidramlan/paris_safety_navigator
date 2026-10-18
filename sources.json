@@ -1,0 +1,25 @@
+{
+  "paris_open_data": {
+    "enabled": true,
+    "name": "Paris Open Data — traffic events",
+    "url": "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/circulation_evenement/records?limit=100",
+    "type": "paris_open_data"
+  },
+  "rss_feeds": [
+    {
+      "enabled": false,
+      "name": "Add a trusted French news or official feed",
+      "url": ""
+    }
+  ],
+  "watch_terms": [
+    "manifestation", "manifestants", "rassemblement", "protest",
+    "demonstration", "riot", "émeute", "violence", "police",
+    "fermeture", "station fermée", "circulation interrompue"
+  ],
+  "watch_places": [
+    "République", "Bastille", "Nation", "Place de la Concorde",
+    "Place de Clichy", "Champs-Élysées", "Assemblée nationale",
+    "Hôtel de Ville", "Gare du Nord", "Saint-Lazare"
+  ]
+}
