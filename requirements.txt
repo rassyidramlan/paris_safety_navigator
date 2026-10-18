@@ -5,3 +5,4 @@ folium>=0.17
 streamlit-folium>=0.23
 feedparser>=6.0
 python-dateutil>=2.9
+tzdata>=2024.1
