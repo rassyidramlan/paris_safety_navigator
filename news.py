@@ -229,8 +229,9 @@ def build(entries, matchers, now):
     return [to_event(i) for i in placed + citywide]
 
 
-def fetch(feeds, now, matchers=None, get=requests.get):
+def fetch(feeds, now, matchers=None, get=None):
     """Read every enabled feed. Returns (events, per-feed status list). Never raises."""
+    get = get or requests.get
     matchers = matchers or load_places()
     entries, status = [], []
     for feed in feeds:
