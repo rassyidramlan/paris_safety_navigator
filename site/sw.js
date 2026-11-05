@@ -1,5 +1,5 @@
 /* Service worker: keeps the app shell and the last data.json available offline. */
-const SHELL = "pulse-shell-v3";
+const SHELL = "pulse-shell-v4";
 const DATA = "pulse-data";
 const SHELL_FILES = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
   "https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css", "https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"];
