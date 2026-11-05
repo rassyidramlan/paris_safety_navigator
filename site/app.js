@@ -27,6 +27,7 @@ const CAT = {
   demo: { label: "Demonstration", plural: "Demonstrations", color: "#e5484d", icon: '<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>' },
   strike: { label: "Strike", plural: "Strikes", color: "#8e6cf0", icon: '<path d="M12 3v10M8.5 6.5 12 3l3.5 3.5"/><rect x="4" y="13" width="16" height="7" rx="2"/>' },
   disruption: { label: "Métro / RER problem", plural: "Métro / RER", color: "#f0a020", icon: '<rect x="6" y="3" width="12" height="14" rx="3"/><path d="M6 11h12M9 21l1.5-4M15 21l-1.5-4"/><circle cx="9" cy="14" r=".6"/><circle cx="15" cy="14" r=".6"/>' },
+  news: { label: "News · unconfirmed", plural: "News", color: "#14a3b8", icon: '<path d="M5 5h11v14H6a1 1 0 0 1-1-1V5z"/><path d="M16 9h3v9a1 1 0 0 1-1 1h-2M8 9h5M8 12h5M8 15h3"/>' },
   works: { label: "Planned works", plural: "Planned works", color: "#5b7ee8", icon: '<path d="M4 20h16M7 20l4-14h2l4 14M9 14h6"/>' },
   road: { label: "Roadworks", plural: "Roads", color: "#8b93a1", icon: '<path d="M6 20 10 4M18 20 14 4M12 6v2M12 11v2M12 16v2"/>' },
 };
@@ -42,7 +43,7 @@ const state = {
   places: store.get("places", []),
   stops: store.get("stops", []),
   gps: store.get("gps", false), me: null,
-  layers: { demo: true, strike: true, disruption: true, works: false, road: false, ...store.get("layers2", {}) },
+  layers: { demo: true, strike: true, news: true, disruption: true, works: false, road: false, ...store.get("layers2", {}) },
   feedFilter: "all", feedQuery: "", wide: false,
   day: null, lastLevels: store.get("lastLevels", {}), original: {},
   picking: false, chosen: null,
@@ -99,9 +100,33 @@ function headline(ev) {
   return where ? `${kind} · ${where}` : t;
 }
 const textOf = (ev) => (state.original[ev.id] ? ev.text : ev.text_en || ev.text);
-const isNearTerm = (ev) => ev.status === "active" || (ev.start && new Date(ev.start) - Date.now() <= NEAR_TERM_H * 3600e3);
+const NEWS_FRESH_H = 6;        // a news report counts as "now" for this long
+const NEWS_NEAR = 1000;        // metres: news can turn a place amber within this distance
+const newsAgeH = (ev) => (Date.now() - new Date(ev.start).getTime()) / 3600e3;
+const isNews = (ev) => ev.cat === "news";
+const isNearTerm = (ev) => isNews(ev) ? newsAgeH(ev) <= NEWS_FRESH_H
+  : ev.status === "active" || (ev.start && new Date(ev.start) - Date.now() <= NEAR_TERM_H * 3600e3);
 const isToday = (ev) => ev.status === "active" || (ev.start && dayKey(new Date(ev.start)) === dayKey(new Date()));
+function reported(ev) {
+  if (ev.date_only) return dayKey(new Date(ev.start)) === dayKey(new Date()) ? "Reported today" : "Reported yesterday";
+  return `Reported ${ago(ev.start)}`;
+}
+/** Outlet names without duplicates ("Le Parisien — Paris" and "Le Parisien" are one outlet). */
+function outletList(ev) {
+  const seen = new Map();
+  for (const name of String(ev.src || "").split(" · ").filter(Boolean)) {
+    const key = name.split(" — ")[0].trim().toLowerCase();
+    if (!seen.has(key)) seen.set(key, name.split(" — ")[0].trim());
+  }
+  return [...seen.values()];
+}
+const reportCount = (ev) => Math.max(1, outletList(ev).length);
+function outlets(ev) {
+  const all = outletList(ev);
+  return all.length > 2 ? `${all.slice(0, 2).join(" · ")} +${all.length - 2}` : all.join(" · ");
+}
 function timing(ev) {
+  if (isNews(ev)) return reported(ev);
   if (ev.status === "active") return ev.end ? `Now until ${when(ev.end)}` : "Now";
   if (ev.status === "upcoming") return `From ${when(ev.start)}`;
   return "";
@@ -123,13 +148,13 @@ function nearestStop(ev, point) {
 }
 function inParis(ev) {
   const near = nearestStop(ev, PARIS);
-  if (!near) return (ev.modes || []).some((m) => m !== "Bus");
+  if (!near) return isNews(ev) || (ev.modes || []).some((m) => m !== "Bus");
   return near.d <= PARIS_RADIUS;
 }
 function describe(ev, near, at) {
-  const what = ev.cat === "demo" ? "Demonstration" : "Line blocked";
+  const what = ev.cat === "demo" ? "Demonstration" : isNews(ev) ? "News report" : "Line blocked";
   const where = near.stop.n ? ` · ${near.stop.n}` : "";
-  const time = at ? "" : ev.status === "active" ? " · now" : ` · from ${when(ev.start)}`;
+  const time = at ? "" : isNews(ev) ? ` · ${reported(ev).toLowerCase()}` : ev.status === "active" ? " · now" : ` · from ${when(ev.start)}`;
   return `${what} ${fmtDist(near.d)} away${where}${time}`;
 }
 /** Status for a place right now. */
@@ -144,6 +169,7 @@ function assess(point, events) {
       else if (isNearTerm(ev) && near.d <= R.amber) { l = "amber"; r = 20 - near.d / 1e3; }
       else if (isToday(ev) && near.d <= R.laterAmber) { l = "amber"; r = 15 - near.d / 1e3; }
     } else if (ev.cat === "disruption" && ev.sev === "Blocking" && ev.status === "active" && near.d <= R.blocked) { l = "amber"; r = 10 - near.d / 1e3; }
+    else if (newsCounts(ev) && isNearTerm(ev) && near.d <= NEWS_NEAR) { l = "amber"; r = 12 - near.d / 1e3; }
     if (l && r > rank) { rank = r; best = { level: l, why: describe(ev, near), cause: ev }; }
   }
   return best;
@@ -161,10 +187,13 @@ function assessAt(point, events, at) {
     if (ev.cat === "demo" && near.d <= R.red) { l = "red"; r = 30 - near.d / 1e3; }
     else if (ev.cat === "demo" && near.d <= R.stopAmber) { l = "amber"; r = 20 - near.d / 1e3; }
     else if (ev.cat === "disruption" && ev.sev === "Blocking" && near.d <= R.blocked) { l = "amber"; r = 10 - near.d / 1e3; }
+    else if (newsCounts(ev) && near.d <= NEWS_NEAR) { l = "amber"; r = 12 - near.d / 1e3; }
     if (l && r > rank) { rank = r; best = { level: l, why: describe(ev, near, true), cause: ev }; }
   }
   return best;
 }
+/** News can only ever make a place amber, and only when it names a precise place (not just an arrondissement). */
+function newsCounts(ev) { return isNews(ev) && ev.precision === "place" && ev.tag !== "strike"; }
 const worst = (ls) => ls.reduce((a, b) => (LEVELS.indexOf(b) > LEVELS.indexOf(a) ? b : a), "green");
 
 /* ---------- data ---------- */
@@ -246,8 +275,9 @@ function geo() {
   for (const ev of events()) {
     if (!state.layers[ev.cat]) continue;
     if (ev.cat === "road") { if (!ev.lt && ev.pts && ev.pts.length > 1) lines.push({ type: "Feature", properties: { id: ev.id }, geometry: { type: "LineString", coordinates: ev.pts.map(([a, b]) => [b, a]) } }); continue; }
-    const soon = ev.cat === "demo" && isNearTerm(ev);
-    for (const s of ev.stops || []) pts.push({ type: "Feature", properties: { id: ev.id, cat: ev.cat, soon }, geometry: { type: "Point", coordinates: [s.lon, s.lat] } });
+    const soon = (ev.cat === "demo" || isNews(ev)) && isNearTerm(ev);
+    const reports = isNews(ev) ? reportCount(ev) : 1;
+    for (const s of ev.stops || []) pts.push({ type: "Feature", properties: { id: ev.id, cat: ev.cat, soon, reports }, geometry: { type: "Point", coordinates: [s.lon, s.lat] } });
   }
   return { pts: { type: "FeatureCollection", features: pts }, lines: { type: "FeatureCollection", features: lines } };
 }
@@ -259,9 +289,17 @@ function addLayers() {
   map.addLayer({ id: "glow", type: "circle", source: "events", filter: ["==", ["get", "cat"], "demo"], paint: {
     "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 10, 13, 26, 16, 70],
     "circle-color": ["case", ["get", "soon"], CAT.demo.color, "#ff8a3d"], "circle-opacity": ["case", ["get", "soon"], 0.32, 0.18], "circle-blur": 0.7 } });
+  // News: a ring sized by how many outlets reported the story (1 outlet = small, 5+ = large).
+  map.addLayer({ id: "news-ring", type: "circle", source: "events", filter: ["==", ["get", "cat"], "news"], paint: {
+    "circle-radius": ["interpolate", ["linear"], ["zoom"],
+      10, ["*", 0.6, ["min", 26, ["+", 9, ["*", 3, ["get", "reports"]]]]],
+      14, ["min", 26, ["+", 9, ["*", 3, ["get", "reports"]]]],
+      17, ["*", 1.6, ["min", 26, ["+", 9, ["*", 3, ["get", "reports"]]]]]],
+    "circle-color": CAT.news.color, "circle-opacity": ["case", ["get", "soon"], 0.18, 0.08],
+    "circle-stroke-color": CAT.news.color, "circle-stroke-width": 1.5, "circle-stroke-opacity": ["case", ["get", "soon"], 0.9, 0.45] } });
   map.addLayer({ id: "dots", type: "circle", source: "events", paint: {
     "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 3, 14, 6, 17, 9],
-    "circle-color": ["match", ["get", "cat"], "demo", CAT.demo.color, "strike", CAT.strike.color, "disruption", CAT.disruption.color, CAT.works.color],
+    "circle-color": ["match", ["get", "cat"], "demo", CAT.demo.color, "strike", CAT.strike.color, "news", CAT.news.color, "disruption", CAT.disruption.color, CAT.works.color],
     "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.5 } });
 }
 function renderMap() {
@@ -279,7 +317,7 @@ function renderMap() {
 }
 function renderLayerChips() {
   const counts = {}; for (const e of parisEvents()) counts[e.cat] = (counts[e.cat] || 0) + 1;
-  $("#layers").innerHTML = ["demo", "strike", "disruption", "works", "road"].map((k) =>
+  $("#layers").innerHTML = ["demo", "news", "strike", "disruption", "works", "road"].map((k) =>
     `<button class="chip" data-layer="${k}" aria-pressed="${!!state.layers[k]}"><span class="swatch" style="background:${CAT[k].color}"></span>${CAT[k].plural}${counts[k] ? ` <span class="n">${counts[k]}</span>` : ""}</button>`).join("");
 }
 function fitTo(points) {
@@ -328,10 +366,13 @@ function bindSheet() {
 }
 
 /* ---------- lists ---------- */
-const order = { demo: 0, strike: 1, disruption: 2, works: 3, road: 4 };
-const byRank = (a, b) => (order[a.cat] - order[b.cat]) || ((a.status === "active" ? 0 : 1) - (b.status === "active" ? 0 : 1))
+const order = { demo: 0, news: 1, strike: 2, disruption: 3, works: 4, road: 5 };
+const byRank = (a, b) => (order[a.cat] - order[b.cat])
+  || (isNews(a) && isNews(b) ? ((b.precision === "place") - (a.precision === "place")) || (+new Date(b.start) - +new Date(a.start)) : 0)
+  || ((a.status === "active" ? 0 : 1) - (b.status === "active" ? 0 : 1))
   || ((a.start ? +new Date(a.start) : 0) - (b.start ? +new Date(b.start) : 0));
 function row(ev) {
+  if (isNews(ev)) return newsRow(ev);
   const tag = ev.status === "active" ? '<span class="when now">Now</span>' : isToday(ev) ? `<span class="when today">${clock(ev.start)}</span>` : `<span class="when later">${ev.start ? fDay.format(new Date(ev.start)) : ""}</span>`;
   const lines = (ev.lines || []).slice(0, 6).map(badge).join("");
   const where = (ev.stops || []).slice(0, 3).map((s) => s.n).join(", ");
@@ -339,6 +380,15 @@ function row(ev) {
     <span class="ev-main"><span class="ev-title">${esc(headline(ev))}</span>
       <span class="ev-meta">${esc(timing(ev))}${where ? ` · ${esc(where)}` : ""}</span>
       ${lines ? `<span class="ev-lines">${lines}</span>` : ""}</span>${tag}</button>`;
+}
+function newsRow(ev) {
+  const where = (ev.stops || []).slice(0, 3).map((s) => s.n).join(", ") || "Paris-wide";
+  const n = reportCount(ev);
+  const many = n > 1 ? `<span class="when news">${n} outlets</span>` : '<span class="when later">1 outlet</span>';
+  return `<button class="ev" data-id="${esc(ev.id)}">${icon("news")}
+    <span class="ev-main"><span class="ev-title">${esc(titleOf(ev))}</span>
+      <span class="ev-meta">${esc(reported(ev))} · ${esc(where)}</span>
+      <span class="ev-meta src">${esc(outlets(ev))} · unconfirmed</span></span>${many}</button>`;
 }
 function placeRow(p, a, time = "") {
   return `<div class="place" data-place="${esc(p.id)}">${time ? `<span class="place-time">${esc(time)}</span>` : `<span class="dot ${a.level}"></span>`}
@@ -357,6 +407,8 @@ function renderSheet() {
   if (pts.length) html += `<div class="list">${pts.map((p) => placeRow(p, assess(p, evs))).join("")}</div><p class="section-label">Happening now</p>`;
   html += now.length ? `<div class="list">${now.map(row).join("")}</div>` : '<p class="empty">No demonstration, strike or Métro/RER notices right now.</p>';
   if (later.length) html += `<p class="section-label">Coming up</p><div class="list">${later.slice(0, 10).map(row).join("")}</div>`;
+  const news = pe.filter((e) => isNews(e) && e.tag !== "strike").sort(byRank).slice(0, 6);
+  if (news.length) html += `<p class="section-label">In the news · unconfirmed</p><div class="list">${news.map(row).join("")}</div>`;
   $("#sheet-body").innerHTML = html;
 }
 
@@ -365,12 +417,16 @@ function renderFeed() {
   const base = events().filter((e) => (state.wide || inParis(e)) && !(e.cat === "road" && e.lt));
   const q = state.feedQuery.trim().toLowerCase();
   const matches = (e) => !q || [titleOf(e), textOf(e), ...(e.lines || []), ...(e.stops || []).map((s) => s.n)].join(" ").toLowerCase().includes(q);
-  const cats = ["all", "demo", "strike", "disruption", "works", "road"];
+  const cats = ["all", "demo", "news", "strike", "disruption", "works", "road"];
   const count = (k) => base.filter((e) => (k === "all" ? e.cat !== "road" : e.cat === k) && matches(e)).length;
   $("#feed-filters").innerHTML = cats.map((k) => `<button class="chip" role="tab" data-filter="${k}" aria-selected="${state.feedFilter === k}">${k === "all" ? "All" : CAT[k].plural} <span class="n">${count(k)}</span></button>`).join("")
     + `<button class="chip" data-wide="1" aria-pressed="${state.wide}">Suburbs</button>`;
   const list = base.filter((e) => (state.feedFilter === "all" ? e.cat !== "road" : e.cat === state.feedFilter) && matches(e)).sort(byRank);
-  const groups = [["Now", list.filter((e) => e.status === "active")], ["Later today", list.filter((e) => e.status !== "active" && isToday(e))], ["This week", list.filter((e) => e.status !== "active" && !isToday(e))]];
+  const fresh = (e) => (isNews(e) ? isNearTerm(e) : e.status === "active");
+  const groups = [["Now", list.filter(fresh)],
+    ["Later today", list.filter((e) => !isNews(e) && e.status !== "active" && isToday(e))],
+    ["This week", list.filter((e) => !isNews(e) && e.status !== "active" && !isToday(e))],
+    ["Earlier reports", list.filter((e) => isNews(e) && !isNearTerm(e))]];
   $("#feed-list").innerHTML = list.length ? groups.filter(([, l]) => l.length).map(([h, l]) => `<div class="group-head">${h}</div><div class="list">${l.map(row).join("")}</div>`).join("")
     : `<p class="empty">${q ? "Nothing matches that search." : "Nothing in this category right now."}</p>`;
   $("#feed-sub").textContent = `${state.wide ? "Île-de-France" : "Central Paris"} · updated ${ago(state.data.generated_at)}`;
@@ -415,6 +471,7 @@ function showDetail(ev) {
   const near = watchPoints().map((p) => { const n = nearestStop(ev, p); return n ? `${esc(p.name)} ${fmtDist(n.d)}` : ""; }).filter(Boolean).join(" · ");
   const c = nearestStop(ev, PARIS) && (ev.stops && ev.stops.length ? ev.stops[Math.floor(ev.stops.length / 2)] : { lat: ev.lat, lon: ev.lon });
   const lines = (ev.lines || []).map(badge).join(" ");
+  if (isNews(ev)) return showNews(ev, near, translated, orig);
   $("#detail-body").innerHTML = `
     <div class="pills"><span class="pill ${ev.cat}">${esc((CAT[ev.cat] || CAT.road).label)}</span><span class="pill">${esc(ev.src)}</span>${ev.sev ? `<span class="pill">${esc(ev.sev)}</span>` : ""}</div>
     <h2 class="detail-title" id="detail-title">${esc(headline(ev))}</h2>
@@ -433,6 +490,27 @@ function showDetail(ev) {
     $("#detail").hidden = true; switchView("map"); setSnap("peek");
     fitTo((ev.stops && ev.stops.length ? ev.stops : []).concat((ev.pts || []).map(([lat, lon]) => ({ lat, lon }))).concat(ev.lat != null && !(ev.stops || []).length ? [{ lat: ev.lat, lon: ev.lon }] : []));
   };
+}
+
+function showNews(ev, near, translated, orig) {
+  const list = outletList(ev);
+  const label = { demonstration: "Demonstration", unrest: "Unrest", strike: "Strike", blockade: "Blockade" }[ev.tag] || "Report";
+  const where = ev.precision === "city" ? "Paris-wide, no specific place" : ev.precision === "area" ? `Area only: ${ev.stops.map((s) => s.n).join(", ")}`
+    : ev.stops.map((s) => s.n).join(", ");
+  $("#detail-body").innerHTML = `
+    <div class="pills"><span class="pill news">News · unconfirmed</span><span class="pill">${esc(label)}</span>${list.length > 1 ? `<span class="pill">${list.length} outlets</span>` : ""}</div>
+    <h2 class="detail-title" id="detail-title">${esc(titleOf(ev))}</h2>
+    <p class="detail-meta"><b>${esc(reported(ev))}</b>${near ? ` · ${near}` : ""}</p>
+    ${translated ? `<p class="msg-note"><span>${orig ? "Original French" : "Translated from French"}</span><button id="toggle-orig">${orig ? "Show English" : "Show original"}</button></p>` : ""}
+    ${textOf(ev) ? `<div class="msg">${esc(textOf(ev))}</div>` : ""}
+    <p class="kv">Where: <b>${esc(where)}</b></p>
+    <p class="kv">Reported by: <b>${esc(list.join(", "))}</b></p>
+    ${ev.why ? `<p class="kv">Flagged because the report says <b>“${esc(ev.why)}”</b></p>` : ""}
+    <p class="kv">News reports are not official notices. They can turn a place amber, never red. Check the official sources in Help.</p>
+    <div class="row-2">${ev.stops.length ? '<button class="btn" id="d-map">Show on map</button>' : ""}<a class="btn" target="_blank" rel="noopener" href="${esc(ev.url)}">Read the article</a></div>`;
+  $("#detail").hidden = false;
+  const t = $("#toggle-orig"); if (t) t.onclick = () => { state.original[ev.id] = !state.original[ev.id]; showDetail(ev); };
+  const m = $("#d-map"); if (m) m.onclick = () => { $("#detail").hidden = true; switchView("map"); setSnap("peek"); fitTo(ev.stops); };
 }
 
 /* ---------- add place / stop ---------- */

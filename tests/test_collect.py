@@ -68,3 +68,29 @@ def test_main_writes_file(tmp_path):
         assert collect.main(["--out", str(target), "--no-translate"]) == 0
     data = json.loads(target.read_text(encoding="utf-8"))
     assert data["generated_at"] and data["events"]
+
+RSS = b"""<?xml version="1.0"?><rss version="2.0"><channel><title>t</title>
+  <item><title>Rassemblement place de la Bastille contre la r\xc3\xa9forme</title><link>https://example.org/n1</link>
+  <pubDate>Sun, 18 Oct 2026 12:00:00 GMT</pubDate></item></channel></rss>"""
+
+
+def test_news_feeds_are_collected_and_reported():
+    config = dict(CONFIG, news_feeds=[
+        {"id": "ok", "name": "Test feed", "url": "https://news.example/rss", "enabled": True},
+        {"id": "down", "name": "Broken feed", "url": "https://down.example/rss", "enabled": True}])
+    base = fake_get()
+
+    def get(url, params=None, headers=None, **kwargs):
+        if "down.example" in url:
+            raise TimeoutError("slow")
+        if "news.example" in url:
+            r = mock.Mock(content=RSS); r.raise_for_status.return_value = None
+            return r
+        return base(url, params=params, headers=headers, **kwargs)
+
+    with mock.patch("requests.get", get):
+        out = collect.collect(now=NOW, api_key="k", config=config)
+    news_src = next(s for s in out["sources"] if s["id"] == "news")
+    assert news_src["ok"] and news_src["count"] == 1 and "down" in news_src["error"]
+    [ev] = [e for e in out["events"] if e["cat"] == "news"]
+    assert ev["stops"][0]["n"] == "Place de la Bastille" and ev["lang"] == "fr"
