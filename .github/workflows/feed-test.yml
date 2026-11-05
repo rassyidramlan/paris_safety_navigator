@@ -1,0 +1,35 @@
+name: News trial run (temporary)
+on:
+  push:
+    branches: [feed-test]
+permissions:
+  contents: read
+jobs:
+  trial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install "requests>=2.32" "feedparser>=6.0" "ctranslate2>=4.4" "sentencepiece>=0.2"
+      - uses: actions/cache/restore@v4
+        with:
+          path: .cache/argos-fr-en
+          key: argos-fr-en-1.9
+      - name: Run the collector (no publishing)
+        env:
+          PRIM_API_KEY: ${{ secrets.PRIM_API_KEY }}
+        shell: bash
+        run: |
+          python collect.py --out /tmp/data.json
+          python - <<'PY'
+          import json
+          d = json.load(open("/tmp/data.json"))
+          for s in d["sources"]:
+              print(f"::notice title=source {s['id']}::ok={s['ok']} count={s['count']} error={s['error']}")
+          for e in [e for e in d["events"] if e["cat"] == "news"][:15]:
+              where = ", ".join(x["n"] for x in e["stops"]) or "Paris-wide"
+              title = (e.get("title_en") or e["title"])[:110]
+              print(f"::notice title=news {e['precision']} x{e['reports']}::{title} | {where}")
+          PY
