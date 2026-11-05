@@ -6,6 +6,32 @@
     "page_url": "https://opendata.paris.fr/explore/dataset/circulation_evenement/",
     "type": "paris_open_data"
   },
+  "news_feeds": [
+    {
+      "id": "leparisien-paris",
+      "name": "Le Parisien — Paris",
+      "url": "https://feeds.leparisien.fr/leparisien/rss/paris-75",
+      "enabled": true
+    },
+    {
+      "id": "france3-paris-idf",
+      "name": "France 3 Paris Île-de-France",
+      "url": "https://france3-regions.francetvinfo.fr/paris-ile-de-france/rss",
+      "enabled": true
+    },
+    {
+      "id": "20minutes-paris",
+      "name": "20 Minutes — Paris",
+      "url": "https://www.20minutes.fr/feeds/rss-paris.xml",
+      "enabled": true
+    },
+    {
+      "id": "google-news-paris",
+      "name": "Google News — Paris protests",
+      "url": "https://news.google.com/rss/search?q=manifestation%20OR%20rassemblement%20Paris&hl=fr&gl=FR&ceid=FR:fr",
+      "enabled": true
+    }
+  ],
   "rss_feeds": [
     {
       "enabled": false,
