@@ -22,6 +22,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import news
 import paris_open_data
 import prim_disruptions
 
@@ -151,6 +152,20 @@ def collect(now=None, api_key=None, locator=None, config=None):
     except Exception as exc:
         sources.append({"id": "roads", "name": "Paris Open Data road works", "ok": False,
                         "error": str(exc)[:200], "count": 0, "feed_updated": None})
+
+    # French news reports (unconfirmed). One failing feed doesn't stop the others.
+    news_feeds = config.get("news_feeds", [])
+    if news_feeds:
+        try:
+            nev, feed_status = news.fetch(news_feeds, now)
+            events += nev
+            failed = [f["id"] for f in feed_status if not f["ok"]]
+            sources.append({"id": "news", "name": "French news (unconfirmed)", "ok": any(f["ok"] for f in feed_status),
+                            "error": ("feeds down: " + ", ".join(failed)) if failed else None,
+                            "count": len(nev), "feed_updated": None})
+        except Exception as exc:
+            sources.append({"id": "news", "name": "French news (unconfirmed)", "ok": False,
+                            "error": str(exc)[:200], "count": 0, "feed_updated": None})
 
     return {"generated_at": iso(now), "sources": sources, "events": events}
 
