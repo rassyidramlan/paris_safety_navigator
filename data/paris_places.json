@@ -1,0 +1,3274 @@
+{
+ "source": "Stations: Île-de-France Mobilités Référentiel des arrêts (Licence Ouverte 2.0). Landmarks and arrondissement centres: approximate, compiled for this app.",
+ "places": [
+  {
+   "name": "Arc de Triomphe",
+   "lat": 48.8738,
+   "lon": 2.295,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "place de l'Étoile"
+   ],
+   "strict_aliases": [
+    "Étoile"
+   ]
+  },
+  {
+   "name": "Assemblée nationale",
+   "lat": 48.8619,
+   "lon": 2.3186,
+   "kind": "landmark",
+   "strict": true,
+   "aliases": [
+    "Palais Bourbon",
+    "palais Bourbon"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Barbès",
+   "lat": 48.8838,
+   "lon": 2.3497,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Barbès-Rochechouart"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Belleville",
+   "lat": 48.8722,
+   "lon": 2.3768,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Bercy",
+   "lat": 48.8396,
+   "lon": 2.3825,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Accor Arena",
+    "ministère de l'Économie"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Boulevard Magenta",
+   "lat": 48.879,
+   "lon": 2.3555,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Boulevard Saint-Germain",
+   "lat": 48.853,
+   "lon": 2.3335,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": [
+    "Saint-Germain-des-Prés"
+   ]
+  },
+  {
+   "name": "Boulevard Voltaire",
+   "lat": 48.859,
+   "lon": 2.379,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Boulevard de Sébastopol",
+   "lat": 48.864,
+   "lon": 2.351,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": [
+    "Sébastopol"
+   ]
+  },
+  {
+   "name": "Canal Saint-Martin",
+   "lat": 48.871,
+   "lon": 2.365,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Champs-Élysées",
+   "lat": 48.8698,
+   "lon": 2.3075,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Champs Elysées",
+    "Champs-Elysées",
+    "avenue des Champs-Élysées"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Gare Montparnasse",
+   "lat": 48.8412,
+   "lon": 2.32,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "tour Montparnasse"
+   ],
+   "strict_aliases": [
+    "Montparnasse"
+   ]
+  },
+  {
+   "name": "Gare Saint-Lazare",
+   "lat": 48.8763,
+   "lon": 2.3253,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Saint-Lazare"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Gare d'Austerlitz",
+   "lat": 48.842,
+   "lon": 2.3655,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": [
+    "Austerlitz"
+   ]
+  },
+  {
+   "name": "Gare de Lyon",
+   "lat": 48.8443,
+   "lon": 2.374,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Gare de l'Est",
+   "lat": 48.8768,
+   "lon": 2.3592,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Gare du Nord",
+   "lat": 48.8809,
+   "lon": 2.3553,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Grands Boulevards",
+   "lat": 48.8716,
+   "lon": 2.3434,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "boulevard Montmartre",
+    "boulevard Poissonnière"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Hôtel de Ville",
+   "lat": 48.8566,
+   "lon": 2.3522,
+   "kind": "landmark",
+   "strict": true,
+   "aliases": [
+    "parvis de l'Hôtel de Ville",
+    "place de l'Hôtel-de-Ville"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Invalides",
+   "lat": 48.86,
+   "lon": 2.3135,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "esplanade des Invalides"
+   ],
+   "strict_aliases": [
+    "les Invalides"
+   ]
+  },
+  {
+   "name": "Jussieu",
+   "lat": 48.8462,
+   "lon": 2.3547,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "campus de Jussieu"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Le Marais",
+   "lat": 48.859,
+   "lon": 2.362,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": [
+    "Marais"
+   ]
+  },
+  {
+   "name": "Les Halles",
+   "lat": 48.862,
+   "lon": 2.347,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Châtelet-Les Halles",
+    "Forum des Halles"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Louvre",
+   "lat": 48.8606,
+   "lon": 2.3376,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "musée du Louvre",
+    "pyramide du Louvre"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Matignon",
+   "lat": 48.8545,
+   "lon": 2.3204,
+   "kind": "landmark",
+   "strict": true,
+   "aliases": [
+    "hôtel de Matignon"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Montmartre",
+   "lat": 48.8867,
+   "lon": 2.3431,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Sacré-Coeur",
+    "Sacré-Cœur",
+    "butte Montmartre"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Ménilmontant",
+   "lat": 48.8661,
+   "lon": 2.3833,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Notre-Dame",
+   "lat": 48.853,
+   "lon": 2.3499,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "cathédrale Notre-Dame",
+    "parvis de Notre-Dame",
+    "île de la Cité"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Opéra Garnier",
+   "lat": 48.8719,
+   "lon": 2.3316,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "place de l'Opéra"
+   ],
+   "strict_aliases": [
+    "Opéra"
+   ]
+  },
+  {
+   "name": "Palais-Royal",
+   "lat": 48.8635,
+   "lon": 2.3365,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Palais Royal"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pigalle",
+   "lat": 48.8822,
+   "lon": 2.3376,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "place Pigalle"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Place Beauvau",
+   "lat": 48.8721,
+   "lon": 2.3163,
+   "kind": "landmark",
+   "strict": true,
+   "aliases": [
+    "ministère de l'Intérieur"
+   ],
+   "strict_aliases": [
+    "Beauvau"
+   ]
+  },
+  {
+   "name": "Place Denfert-Rochereau",
+   "lat": 48.8339,
+   "lon": 2.3324,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Denfert-Rochereau"
+   ],
+   "strict_aliases": [
+    "Denfert"
+   ]
+  },
+  {
+   "name": "Place Saint-Michel",
+   "lat": 48.8534,
+   "lon": 2.3442,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "boulevard Saint-Michel",
+    "fontaine Saint-Michel"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Place Vendôme",
+   "lat": 48.8675,
+   "lon": 2.3294,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Place d'Italie",
+   "lat": 48.831,
+   "lon": 2.3555,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Place de Clichy",
+   "lat": 48.8836,
+   "lon": 2.3272,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Place de la Bastille",
+   "lat": 48.8532,
+   "lon": 2.3692,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Bastille",
+    "Opéra Bastille"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Place de la Concorde",
+   "lat": 48.8656,
+   "lon": 2.3212,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": [
+    "Concorde"
+   ]
+  },
+  {
+   "name": "Place de la Nation",
+   "lat": 48.8483,
+   "lon": 2.3958,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": [
+    "Nation"
+   ]
+  },
+  {
+   "name": "Place de la République",
+   "lat": 48.8674,
+   "lon": 2.3636,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": [
+    "République"
+   ]
+  },
+  {
+   "name": "Port-Royal",
+   "lat": 48.8398,
+   "lon": 2.3371,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte Maillot",
+   "lat": 48.878,
+   "lon": 2.283,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de la Chapelle",
+   "lat": 48.898,
+   "lon": 2.359,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": [
+    "La Chapelle"
+   ]
+  },
+  {
+   "name": "Préfecture de police",
+   "lat": 48.8545,
+   "lon": 2.3471,
+   "kind": "landmark",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Rue de Rivoli",
+   "lat": 48.859,
+   "lon": 2.348,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Sorbonne",
+   "lat": 48.8486,
+   "lon": 2.3434,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Quartier latin"
+   ],
+   "strict_aliases": [
+    "la Sorbonne"
+   ]
+  },
+  {
+   "name": "Stalingrad",
+   "lat": 48.8843,
+   "lon": 2.3685,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "place de la Bataille-de-Stalingrad"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Sénat",
+   "lat": 48.8483,
+   "lon": 2.3372,
+   "kind": "landmark",
+   "strict": true,
+   "aliases": [
+    "Palais du Luxembourg",
+    "jardin du Luxembourg"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Tour Eiffel",
+   "lat": 48.8584,
+   "lon": 2.2945,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "Champ de Mars",
+    "Champ-de-Mars",
+    "tour Eiffel"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Trocadéro",
+   "lat": 48.8616,
+   "lon": 2.2893,
+   "kind": "landmark",
+   "strict": false,
+   "aliases": [
+    "parvis des droits de l'Homme",
+    "place du Trocadéro"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Élysée",
+   "lat": 48.8704,
+   "lon": 2.3167,
+   "kind": "landmark",
+   "strict": true,
+   "aliases": [
+    "palais de l'Élysée",
+    "rue du Faubourg-Saint-Honoré"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "10e arrondissement",
+   "lat": 48.8762,
+   "lon": 2.3608,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(Xe)",
+    "10e arr.",
+    "Paris 10e",
+    "Xe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "11e arrondissement",
+   "lat": 48.859,
+   "lon": 2.38,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(XIe)",
+    "11e arr.",
+    "Paris 11e",
+    "XIe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "12e arrondissement",
+   "lat": 48.84,
+   "lon": 2.388,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(XIIe)",
+    "12e arr.",
+    "Paris 12e",
+    "XIIe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "13e arrondissement",
+   "lat": 48.8283,
+   "lon": 2.3623,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(XIIIe)",
+    "13e arr.",
+    "Paris 13e",
+    "XIIIe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "14e arrondissement",
+   "lat": 48.8292,
+   "lon": 2.3266,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(XIVe)",
+    "14e arr.",
+    "Paris 14e",
+    "XIVe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "15e arrondissement",
+   "lat": 48.8401,
+   "lon": 2.293,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(XVe)",
+    "15e arr.",
+    "Paris 15e",
+    "XVe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "16e arrondissement",
+   "lat": 48.863,
+   "lon": 2.276,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(XVIe)",
+    "16e arr.",
+    "Paris 16e",
+    "XVIe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "17e arrondissement",
+   "lat": 48.8873,
+   "lon": 2.3067,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(XVIIe)",
+    "17e arr.",
+    "Paris 17e",
+    "XVIIe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "18e arrondissement",
+   "lat": 48.8925,
+   "lon": 2.3484,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(XVIIIe)",
+    "18e arr.",
+    "Paris 18e",
+    "XVIIIe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "19e arrondissement",
+   "lat": 48.8871,
+   "lon": 2.3848,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(XIXe)",
+    "19e arr.",
+    "Paris 19e",
+    "XIXe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "1er arrondissement",
+   "lat": 48.8625,
+   "lon": 2.3363,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(Ier)",
+    "1er arr.",
+    "Ier arrondissement",
+    "Paris 1er"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "20e arrondissement",
+   "lat": 48.8634,
+   "lon": 2.4012,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(XXe)",
+    "20e arr.",
+    "Paris 20e",
+    "XXe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "2e arrondissement",
+   "lat": 48.8683,
+   "lon": 2.3428,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(IIe)",
+    "2e arr.",
+    "IIe arrondissement",
+    "Paris 2e"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "3e arrondissement",
+   "lat": 48.863,
+   "lon": 2.36,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(IIIe)",
+    "3e arr.",
+    "IIIe arrondissement",
+    "Paris 3e"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "4e arrondissement",
+   "lat": 48.8543,
+   "lon": 2.3576,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(IVe)",
+    "4e arr.",
+    "IVe arrondissement",
+    "Paris 4e"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "5e arrondissement",
+   "lat": 48.8445,
+   "lon": 2.3507,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(Ve)",
+    "5e arr.",
+    "Paris 5e",
+    "Ve arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "6e arrondissement",
+   "lat": 48.8491,
+   "lon": 2.3328,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(VIe)",
+    "6e arr.",
+    "Paris 6e",
+    "VIe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "7e arrondissement",
+   "lat": 48.8562,
+   "lon": 2.3121,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(VIIe)",
+    "7e arr.",
+    "Paris 7e",
+    "VIIe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "8e arrondissement",
+   "lat": 48.8727,
+   "lon": 2.3125,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(VIIIe)",
+    "8e arr.",
+    "Paris 8e",
+    "VIIIe arrondissement"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "9e arrondissement",
+   "lat": 48.877,
+   "lon": 2.3375,
+   "kind": "district",
+   "strict": false,
+   "aliases": [
+    "(IXe)",
+    "9e arr.",
+    "IXe arrondissement",
+    "Paris 9e"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Abbesses",
+   "lat": 48.88439,
+   "lon": 2.33838,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Alexandre Dumas",
+   "lat": 48.85602,
+   "lon": 2.39485,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Alma - Marceau",
+   "lat": 48.86469,
+   "lon": 2.30112,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Marceau"
+   ],
+   "strict_aliases": [
+    "Alma"
+   ]
+  },
+  {
+   "name": "Alésia",
+   "lat": 48.82818,
+   "lon": 2.32714,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Anvers",
+   "lat": 48.88287,
+   "lon": 2.34415,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Argentine",
+   "lat": 48.87533,
+   "lon": 2.29012,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Arts et Métiers",
+   "lat": 48.86546,
+   "lon": 2.35661,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Assemblée Nationale",
+   "lat": 48.8611,
+   "lon": 2.32063,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Auber",
+   "lat": 48.87234,
+   "lon": 2.32965,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Avenue Foch",
+   "lat": 48.86985,
+   "lon": 2.27478,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Avenue Henri Martin",
+   "lat": 48.86547,
+   "lon": 2.27223,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Avenue du Président Kennedy",
+   "lat": 48.85354,
+   "lon": 2.27967,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Avenue du Président Kennedy Maison de Radio France",
+   "lat": 48.85353,
+   "lon": 2.27968,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Avenue Émile Zola",
+   "lat": 48.84698,
+   "lon": 2.29468,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Avron",
+   "lat": 48.85182,
+   "lon": 2.39806,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Balard",
+   "lat": 48.83652,
+   "lon": 2.27844,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Barbès - Rochechouart",
+   "lat": 48.88361,
+   "lon": 2.35014,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Barbès",
+    "Rochechouart"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Bastille",
+   "lat": 48.85292,
+   "lon": 2.36905,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Bel-Air",
+   "lat": 48.84135,
+   "lon": 2.40092,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Bibliothèque François Mitterrand",
+   "lat": 48.82919,
+   "lon": 2.3774,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Bir-Hakeim",
+   "lat": 48.8539,
+   "lon": 2.28935,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Blanche",
+   "lat": 48.88377,
+   "lon": 2.33248,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Boissière",
+   "lat": 48.86685,
+   "lon": 2.29003,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Bolivar",
+   "lat": 48.88079,
+   "lon": 2.37414,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Bonne Nouvelle",
+   "lat": 48.87055,
+   "lon": 2.3487,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Botzaris",
+   "lat": 48.87949,
+   "lon": 2.38869,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Boucicaut",
+   "lat": 48.84107,
+   "lon": 2.28786,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Boulainvilliers",
+   "lat": 48.85698,
+   "lon": 2.2748,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Bourse",
+   "lat": 48.86877,
+   "lon": 2.34067,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Brochant",
+   "lat": 48.8906,
+   "lon": 2.32015,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Bréguet-Sabin",
+   "lat": 48.85616,
+   "lon": 2.37022,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Buttes Chaumont",
+   "lat": 48.87843,
+   "lon": 2.38135,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Buzenval",
+   "lat": 48.85176,
+   "lon": 2.40117,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Cadet",
+   "lat": 48.87602,
+   "lon": 2.34462,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Cambronne",
+   "lat": 48.84752,
+   "lon": 2.30292,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Campo-Formio",
+   "lat": 48.83557,
+   "lon": 2.35861,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Cardinal Lemoine",
+   "lat": 48.8467,
+   "lon": 2.35133,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Censier - Daubenton",
+   "lat": 48.84025,
+   "lon": 2.35156,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Censier",
+    "Daubenton"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Champ de Mars Tour Eiffel",
+   "lat": 48.85647,
+   "lon": 2.28965,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Champs-Élysées - Clemenceau",
+   "lat": 48.86751,
+   "lon": 2.31412,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Champs-Élysées",
+    "Clemenceau"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Chardon Lagache",
+   "lat": 48.84509,
+   "lon": 2.26691,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Charles Michels",
+   "lat": 48.84648,
+   "lon": 2.28562,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Charles de Gaulle - Étoile",
+   "lat": 48.87445,
+   "lon": 2.29543,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": [
+    "Charles de Gaulle",
+    "Étoile"
+   ]
+  },
+  {
+   "name": "Charonne",
+   "lat": 48.85498,
+   "lon": 2.38488,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Chaussée d'Antin - La Fayette",
+   "lat": 48.87303,
+   "lon": 2.33376,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Chaussée d'Antin",
+    "La Fayette"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Chemin Vert",
+   "lat": 48.8571,
+   "lon": 2.36816,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Chevaleret",
+   "lat": 48.83497,
+   "lon": 2.36812,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Château Landon",
+   "lat": 48.87853,
+   "lon": 2.36206,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Château Rouge",
+   "lat": 48.8871,
+   "lon": 2.34956,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Château d'Eau",
+   "lat": 48.87265,
+   "lon": 2.35617,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Château de Vincennes",
+   "lat": 48.84456,
+   "lon": 2.43875,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Châtelet",
+   "lat": 48.85855,
+   "lon": 2.34743,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Châtelet - Les Halles",
+   "lat": 48.86175,
+   "lon": 2.34696,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Châtelet",
+    "Les Halles"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Cité",
+   "lat": 48.85493,
+   "lon": 2.3473,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Cité Universitaire",
+   "lat": 48.82154,
+   "lon": 2.33885,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Cluny - La Sorbonne",
+   "lat": 48.85087,
+   "lon": 2.34486,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Cluny",
+    "La Sorbonne"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Colonel Fabien",
+   "lat": 48.87767,
+   "lon": 2.37052,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Commerce",
+   "lat": 48.8445,
+   "lon": 2.29372,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Concorde",
+   "lat": 48.86628,
+   "lon": 2.32322,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Convention",
+   "lat": 48.83713,
+   "lon": 2.29638,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Corentin Cariou",
+   "lat": 48.89467,
+   "lon": 2.38229,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Corvisart",
+   "lat": 48.8298,
+   "lon": 2.35045,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Cour Saint-Emilion",
+   "lat": 48.83327,
+   "lon": 2.38656,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Courcelles",
+   "lat": 48.87927,
+   "lon": 2.30329,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Couronnes",
+   "lat": 48.86926,
+   "lon": 2.38041,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Crimée",
+   "lat": 48.89084,
+   "lon": 2.37701,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Danube",
+   "lat": 48.88195,
+   "lon": 2.39323,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Daumesnil",
+   "lat": 48.83958,
+   "lon": 2.39586,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Denfert-Rochereau",
+   "lat": 48.83364,
+   "lon": 2.33284,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Dugommier",
+   "lat": 48.83906,
+   "lon": 2.38987,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Dupleix",
+   "lat": 48.85042,
+   "lon": 2.29361,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Duroc",
+   "lat": 48.84727,
+   "lon": 2.31613,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Edgar Quinet",
+   "lat": 48.84092,
+   "lon": 2.32559,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Europe",
+   "lat": 48.87884,
+   "lon": 2.32223,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Exelmans",
+   "lat": 48.84246,
+   "lon": 2.25965,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Faidherbe - Chaligny",
+   "lat": 48.85016,
+   "lon": 2.38405,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Chaligny",
+    "Faidherbe"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Falguière",
+   "lat": 48.84438,
+   "lon": 2.31753,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Filles du Calvaire",
+   "lat": 48.86307,
+   "lon": 2.36671,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Franklin D. Roosevelt",
+   "lat": 48.86889,
+   "lon": 2.30964,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Funiculaire Gare basse",
+   "lat": 48.88469,
+   "lon": 2.3426,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Funiculaire Gare haute",
+   "lat": 48.88558,
+   "lon": 2.34254,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Félix Faure",
+   "lat": 48.84272,
+   "lon": 2.2918,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Gambetta",
+   "lat": 48.86504,
+   "lon": 2.39806,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Gare Vaugirard",
+   "lat": 48.83692,
+   "lon": 2.31426,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Gare de Rosa Parks",
+   "lat": 48.89654,
+   "lon": 2.37345,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Gaîté",
+   "lat": 48.83876,
+   "lon": 2.32246,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "George V",
+   "lat": 48.8721,
+   "lon": 2.30032,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Glacière",
+   "lat": 48.83114,
+   "lon": 2.34347,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Goncourt",
+   "lat": 48.86989,
+   "lon": 2.37086,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Guy Môquet",
+   "lat": 48.89302,
+   "lon": 2.32752,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Haussmann Saint-Lazare",
+   "lat": 48.875,
+   "lon": 2.32867,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Havre-Caumartin",
+   "lat": 48.87361,
+   "lon": 2.32759,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Iéna",
+   "lat": 48.86473,
+   "lon": 2.29389,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Jacques Bonsergent",
+   "lat": 48.87064,
+   "lon": 2.36108,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Jasmin",
+   "lat": 48.85245,
+   "lon": 2.26808,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Jaurès",
+   "lat": 48.88235,
+   "lon": 2.37072,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Javel",
+   "lat": 48.84716,
+   "lon": 2.27803,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Javel - André Citroën",
+   "lat": 48.84612,
+   "lon": 2.27774,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": [
+    "André Citroën",
+    "Javel"
+   ]
+  },
+  {
+   "name": "Jourdain",
+   "lat": 48.87517,
+   "lon": 2.38954,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Jules Joffrin",
+   "lat": 48.89245,
+   "lon": 2.34461,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Kléber",
+   "lat": 48.87128,
+   "lon": 2.29326,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "La Chapelle",
+   "lat": 48.88441,
+   "lon": 2.3604,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "La Fourche",
+   "lat": 48.88694,
+   "lon": 2.32585,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "La Motte-Picquet - Grenelle",
+   "lat": 48.8493,
+   "lon": 2.29872,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Grenelle",
+    "La Motte-Picquet"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "La Muette",
+   "lat": 48.85809,
+   "lon": 2.2741,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "La Tour-Maubourg",
+   "lat": 48.85761,
+   "lon": 2.31041,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Lamarck - Caulaincourt",
+   "lat": 48.88969,
+   "lon": 2.33852,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Caulaincourt",
+    "Lamarck"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Laumière",
+   "lat": 48.88517,
+   "lon": 2.37935,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Le Peletier",
+   "lat": 48.87491,
+   "lon": 2.34018,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Ledru-Rollin",
+   "lat": 48.85127,
+   "lon": 2.37603,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Les Gobelins",
+   "lat": 48.83583,
+   "lon": 2.35262,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Liège",
+   "lat": 48.87965,
+   "lon": 2.32703,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Louis Blanc",
+   "lat": 48.8811,
+   "lon": 2.36453,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Lourmel",
+   "lat": 48.8386,
+   "lon": 2.28188,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Louvre - Rivoli",
+   "lat": 48.86111,
+   "lon": 2.34018,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Louvre",
+    "Rivoli"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Luxembourg",
+   "lat": 48.84545,
+   "lon": 2.3398,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Mabillon",
+   "lat": 48.85291,
+   "lon": 2.33499,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Madeleine",
+   "lat": 48.8701,
+   "lon": 2.32595,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Magenta",
+   "lat": 48.88081,
+   "lon": 2.35872,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Maison Blanche",
+   "lat": 48.82186,
+   "lon": 2.35879,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Malesherbes",
+   "lat": 48.88283,
+   "lon": 2.30942,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Maraîchers",
+   "lat": 48.85269,
+   "lon": 2.40604,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Marcadet - Poissonniers",
+   "lat": 48.89139,
+   "lon": 2.34981,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Marcadet",
+    "Poissonniers"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Marx Dormoy",
+   "lat": 48.89059,
+   "lon": 2.35988,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Maubert - Mutualité",
+   "lat": 48.85013,
+   "lon": 2.34804,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Maubert",
+    "Mutualité"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Michel Bizot",
+   "lat": 48.83704,
+   "lon": 2.40232,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Michel-Ange - Auteuil",
+   "lat": 48.84779,
+   "lon": 2.2638,
+   "kind": "station",
+   "strict": true,
+   "aliases": [
+    "Auteuil"
+   ],
+   "strict_aliases": [
+    "Michel-Ange"
+   ]
+  },
+  {
+   "name": "Michel-Ange - Molitor",
+   "lat": 48.84488,
+   "lon": 2.2616,
+   "kind": "station",
+   "strict": true,
+   "aliases": [
+    "Molitor"
+   ],
+   "strict_aliases": [
+    "Michel-Ange"
+   ]
+  },
+  {
+   "name": "Mirabeau",
+   "lat": 48.84708,
+   "lon": 2.27306,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Miromesnil",
+   "lat": 48.87355,
+   "lon": 2.3148,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Monceau",
+   "lat": 48.88057,
+   "lon": 2.30941,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Montgallet",
+   "lat": 48.84403,
+   "lon": 2.39046,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Montparnasse Bienvenue",
+   "lat": 48.843,
+   "lon": 2.32263,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Mouton-Duvernet",
+   "lat": 48.83136,
+   "lon": 2.32984,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Musée d'Orsay",
+   "lat": 48.86036,
+   "lon": 2.32669,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Nation",
+   "lat": 48.84823,
+   "lon": 2.39598,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Nationale",
+   "lat": 48.83321,
+   "lon": 2.36283,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Neuilly - Porte Maillot",
+   "lat": 48.87843,
+   "lon": 2.28445,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Neuilly",
+    "Porte Maillot"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Notre-Dame-de-Lorette",
+   "lat": 48.87604,
+   "lon": 2.33771,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Notre-Dame-des-Champs",
+   "lat": 48.84508,
+   "lon": 2.32863,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Oberkampf",
+   "lat": 48.86472,
+   "lon": 2.36838,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Odéon",
+   "lat": 48.85215,
+   "lon": 2.3402,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Olympiades",
+   "lat": 48.82712,
+   "lon": 2.36709,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Opéra",
+   "lat": 48.87072,
+   "lon": 2.33192,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Ourcq",
+   "lat": 48.88703,
+   "lon": 2.38666,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Palais Royal - Musée du Louvre",
+   "lat": 48.86277,
+   "lon": 2.3361,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Musée du Louvre",
+    "Palais Royal"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Paris Austerlitz",
+   "lat": 48.84035,
+   "lon": 2.36764,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Paris Bercy Bourgogne - Pays d'Auvergne",
+   "lat": 48.83815,
+   "lon": 2.38545,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Paris Bercy Bourgogne",
+    "Pays d'Auvergne"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Paris Est",
+   "lat": 48.87863,
+   "lon": 2.36036,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Paris Gare de Lyon",
+   "lat": 48.84331,
+   "lon": 2.37662,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Paris Gare du Nord",
+   "lat": 48.88223,
+   "lon": 2.35669,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Paris Montparnasse",
+   "lat": 48.83883,
+   "lon": 2.31754,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Paris Saint-Lazare",
+   "lat": 48.87747,
+   "lon": 2.32443,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Parmentier",
+   "lat": 48.8652,
+   "lon": 2.3747,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Passy",
+   "lat": 48.8575,
+   "lon": 2.28579,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pasteur",
+   "lat": 48.8427,
+   "lon": 2.31273,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pelleport",
+   "lat": 48.86824,
+   "lon": 2.4014,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pereire",
+   "lat": 48.88489,
+   "lon": 2.29769,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pernety",
+   "lat": 48.83386,
+   "lon": 2.31798,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Philippe Auguste",
+   "lat": 48.85813,
+   "lon": 2.3906,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Picpus",
+   "lat": 48.84506,
+   "lon": 2.40126,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Place Monge",
+   "lat": 48.84267,
+   "lon": 2.35208,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Place des Fêtes",
+   "lat": 48.87687,
+   "lon": 2.39324,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Plaisance",
+   "lat": 48.83174,
+   "lon": 2.31395,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Poissonnière",
+   "lat": 48.87707,
+   "lon": 2.34866,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pont Cardinet",
+   "lat": 48.8886,
+   "lon": 2.31358,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pont Marie (Cité des Arts)",
+   "lat": 48.85354,
+   "lon": 2.35726,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pont Neuf",
+   "lat": 48.8585,
+   "lon": 2.34174,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pont de l'Alma",
+   "lat": 48.86247,
+   "lon": 2.30008,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pont du Garigliano - Hôpital Européen G. Pompidou",
+   "lat": 48.83893,
+   "lon": 2.27047,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Hôpital Européen G. Pompidou",
+    "Pont du Garigliano"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Port Royal",
+   "lat": 48.84007,
+   "lon": 2.33714,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte Dauphine",
+   "lat": 48.8715,
+   "lon": 2.27762,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte Dorée",
+   "lat": 48.83504,
+   "lon": 2.40581,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte d'Auteuil",
+   "lat": 48.84795,
+   "lon": 2.25849,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte d'Italie",
+   "lat": 48.81907,
+   "lon": 2.3595,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte d'Ivry",
+   "lat": 48.82142,
+   "lon": 2.3694,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte d'Orléans",
+   "lat": 48.82341,
+   "lon": 2.32556,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Bagnolet",
+   "lat": 48.86443,
+   "lon": 2.40879,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Champerret",
+   "lat": 48.88569,
+   "lon": 2.29198,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Charenton",
+   "lat": 48.83353,
+   "lon": 2.40244,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Choisy",
+   "lat": 48.82009,
+   "lon": 2.36465,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Clichy",
+   "lat": 48.89453,
+   "lon": 2.31433,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Clignancourt",
+   "lat": 48.89754,
+   "lon": 2.34469,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Montreuil",
+   "lat": 48.85352,
+   "lon": 2.41071,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Pantin",
+   "lat": 48.88846,
+   "lon": 2.39197,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Saint-Cloud",
+   "lat": 48.8379,
+   "lon": 2.25708,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Saint-Ouen",
+   "lat": 48.8975,
+   "lon": 2.32899,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Vanves",
+   "lat": 48.82738,
+   "lon": 2.30478,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Versailles",
+   "lat": 48.83249,
+   "lon": 2.28809,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de Vincennes",
+   "lat": 48.84732,
+   "lon": 2.40799,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte de la Villette",
+   "lat": 48.89783,
+   "lon": 2.38582,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Porte des Lilas",
+   "lat": 48.87692,
+   "lon": 2.40676,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pré-Saint-Gervais",
+   "lat": 48.88016,
+   "lon": 2.39858,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pyramides",
+   "lat": 48.86575,
+   "lon": 2.33443,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Pyrénées",
+   "lat": 48.87385,
+   "lon": 2.38507,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Père Lachaise",
+   "lat": 48.86262,
+   "lon": 2.3872,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Péreire Levallois",
+   "lat": 48.88603,
+   "lon": 2.29925,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Quai de la Gare",
+   "lat": 48.83704,
+   "lon": 2.3728,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Quai de la Rapée",
+   "lat": 48.84646,
+   "lon": 2.36594,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Quatre Septembre",
+   "lat": 48.86961,
+   "lon": 2.33642,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Rambuteau",
+   "lat": 48.86119,
+   "lon": 2.35327,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Ranelagh",
+   "lat": 48.8554,
+   "lon": 2.26999,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Raspail",
+   "lat": 48.83901,
+   "lon": 2.33068,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Rennes",
+   "lat": 48.84826,
+   "lon": 2.3279,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Reuilly - Diderot",
+   "lat": 48.84711,
+   "lon": 2.38617,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Diderot",
+    "Reuilly"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Richard-Lenoir",
+   "lat": 48.85982,
+   "lon": 2.3719,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Richelieu - Drouot",
+   "lat": 48.87196,
+   "lon": 2.3387,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Drouot",
+    "Richelieu"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Riquet",
+   "lat": 48.88796,
+   "lon": 2.37344,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Rome",
+   "lat": 48.8823,
+   "lon": 2.32138,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Rosa Parks",
+   "lat": 48.89644,
+   "lon": 2.37393,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Rue Saint-Maur",
+   "lat": 48.86409,
+   "lon": 2.38047,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Rue de la Pompe",
+   "lat": 48.86399,
+   "lon": 2.2779,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Rue des Boulets",
+   "lat": 48.85229,
+   "lon": 2.38927,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Rue du Bac",
+   "lat": 48.85588,
+   "lon": 2.32569,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Réaumur - Sébastopol",
+   "lat": 48.8662,
+   "lon": 2.35227,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Réaumur"
+   ],
+   "strict_aliases": [
+    "Sébastopol"
+   ]
+  },
+  {
+   "name": "République",
+   "lat": 48.86754,
+   "lon": 2.36394,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Ambroise",
+   "lat": 48.86145,
+   "lon": 2.37394,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Augustin",
+   "lat": 48.87459,
+   "lon": 2.32102,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Fargeau",
+   "lat": 48.87169,
+   "lon": 2.40433,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-François-Xavier",
+   "lat": 48.85194,
+   "lon": 2.31446,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Georges",
+   "lat": 48.87839,
+   "lon": 2.33751,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Germain-des-Prés",
+   "lat": 48.85362,
+   "lon": 2.33397,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Jacques",
+   "lat": 48.83289,
+   "lon": 2.33713,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Lazare",
+   "lat": 48.87543,
+   "lon": 2.32527,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Marcel",
+   "lat": 48.83851,
+   "lon": 2.36073,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Michel",
+   "lat": 48.85343,
+   "lon": 2.34379,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Michel Notre-Dame",
+   "lat": 48.85302,
+   "lon": 2.345,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Paul (Le Marais)",
+   "lat": 48.85524,
+   "lon": 2.36088,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Philippe-du-Roule",
+   "lat": 48.87201,
+   "lon": 2.31003,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Placide",
+   "lat": 48.84707,
+   "lon": 2.32703,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Sulpice",
+   "lat": 48.85123,
+   "lon": 2.33085,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Saint-Sébastien - Froissart",
+   "lat": 48.86097,
+   "lon": 2.36725,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Froissart",
+    "Saint-Sébastien"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Sentier",
+   "lat": 48.86732,
+   "lon": 2.34753,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Simplon",
+   "lat": 48.89389,
+   "lon": 2.34783,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Solférino",
+   "lat": 48.85854,
+   "lon": 2.32309,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Strasbourg - Saint-Denis",
+   "lat": 48.86951,
+   "lon": 2.35388,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Saint-Denis",
+    "Strasbourg"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Sully - Morland",
+   "lat": 48.85137,
+   "lon": 2.36182,
+   "kind": "station",
+   "strict": true,
+   "aliases": [
+    "Morland"
+   ],
+   "strict_aliases": [
+    "Sully"
+   ]
+  },
+  {
+   "name": "Sèvres - Babylone",
+   "lat": 48.85137,
+   "lon": 2.32649,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Babylone",
+    "Sèvres"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Sèvres-Lecourbe",
+   "lat": 48.84562,
+   "lon": 2.30951,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Ségur",
+   "lat": 48.84733,
+   "lon": 2.30699,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Temple",
+   "lat": 48.86672,
+   "lon": 2.36158,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Ternes",
+   "lat": 48.87821,
+   "lon": 2.29811,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Tolbiac",
+   "lat": 48.82615,
+   "lon": 2.35717,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Trinité - d'Estienne d'Orves",
+   "lat": 48.87632,
+   "lon": 2.33333,
+   "kind": "station",
+   "strict": false,
+   "aliases": [
+    "Trinité",
+    "d'Estienne d'Orves"
+   ],
+   "strict_aliases": []
+  },
+  {
+   "name": "Tuileries",
+   "lat": 48.86469,
+   "lon": 2.32908,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Télégraphe",
+   "lat": 48.87546,
+   "lon": 2.39856,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Vaneau",
+   "lat": 48.84883,
+   "lon": 2.32136,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Varenne",
+   "lat": 48.8564,
+   "lon": 2.31501,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Vaugirard",
+   "lat": 48.83949,
+   "lon": 2.30103,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Vavin",
+   "lat": 48.8421,
+   "lon": 2.32909,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Victor Hugo",
+   "lat": 48.86997,
+   "lon": 2.28602,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Villiers",
+   "lat": 48.88119,
+   "lon": 2.31577,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Volontaires",
+   "lat": 48.84146,
+   "lon": 2.30776,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Voltaire",
+   "lat": 48.85788,
+   "lon": 2.38003,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Wagram",
+   "lat": 48.8838,
+   "lon": 2.30465,
+   "kind": "station",
+   "strict": true,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "École Militaire",
+   "lat": 48.85495,
+   "lon": 2.30651,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Église d'Auteuil",
+   "lat": 48.84714,
+   "lon": 2.26922,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  },
+  {
+   "name": "Étienne Marcel",
+   "lat": 48.8637,
+   "lon": 2.34898,
+   "kind": "station",
+   "strict": false,
+   "aliases": [],
+   "strict_aliases": []
+  }
+ ]
+}
