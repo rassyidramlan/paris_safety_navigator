@@ -52,6 +52,17 @@ python -m http.server -d site 8000       # open http://localhost:8000
 
 On Windows PowerShell: `$env:PRIM_API_KEY="..."` before `python collect.py`.
 
+## Trip tab
+
+The Trip tab shows the family itinerary day by day: you can tick off each stop, see a pre-trip checklist, and open any stop in Google Maps. Stops that have coordinates also appear in **Today**, where they get the same demonstration check as your own stops.
+
+The itinerary says where the family will be, hour by hour, so it is **never committed to this public repo or published with the site**. Each phone loads it in one of two ways:
+
+- **Open file**: pick the `itinerary.json` file. Good for a one-off load.
+- **Use link**: paste a private `https://` link to the file, for example the raw URL of a secret GitHub gist. The app fetches it every time it opens and keeps the last copy for offline use. To change the plan mid-trip, edit the gist and every phone picks the change up. A banner lists what changed, for example "Day 4: Galeries Lafayette now 15:00", and a notification is sent if alerts are on.
+
+Each stop has a fixed `id`, so ticks survive updates. The file format is `schema_version: 1` with `days[].stops[]` (`id`, `time`, `title`, optional `end`, `notes`, `cost`, `ticket`, `maps_query`, `lat`, `lon`) and `prep[]` (`id`, `category`, `task`, `due`).
+
 ## Older files
 
 `app.py` (Streamlit dashboard) and `monitor.py` (Telegram alerts) are the first prototype. They still work but are no longer the main app; `monitor.yml` no longer runs on a schedule.

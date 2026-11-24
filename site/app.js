@@ -204,9 +204,11 @@ function watchPoints() {
   if (state.gps && state.me) pts.unshift({ id: "me", name: "You", ...state.me, kind: "me" });
   return pts;
 }
+/** Your own stops plus itinerary stops that have a location (trip.js). */
+const allStops = () => state.stops.concat(typeof tripStops === "function" ? tripStops() : []);
 function upcomingStops(hours = 3) {
   const now = Date.now();
-  return state.stops.map((s) => ({ ...s, at: parisDate(s.date, s.time) }))
+  return allStops().map((s) => ({ ...s, at: parisDate(s.date, s.time) }))
     .filter((s) => s.at.getTime() >= now - 3600e3 && s.at.getTime() <= now + hours * 3600e3);
 }
 async function load() {
@@ -393,7 +395,7 @@ function newsRow(ev) {
 function placeRow(p, a, time = "") {
   return `<div class="place" data-place="${esc(p.id)}">${time ? `<span class="place-time">${esc(time)}</span>` : `<span class="dot ${a.level}"></span>`}
     <div><div class="place-name">${time ? `<span class="dot ${a.level}"></span> ` : ""}${esc(p.name)}</div><div class="place-why ${a.level}">${esc(a.why)}</div></div>
-    ${p.kind === "me" ? "" : `<button class="icon-btn" data-remove="${esc(p.id)}" aria-label="Remove ${esc(p.name)}"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`}</div>`;
+    ${p.kind === "me" ? "" : p.kind === "trip" ? '<span class="trip-tag" title="From your itinerary">Trip</span>' : `<button class="icon-btn" data-remove="${esc(p.id)}" aria-label="Remove ${esc(p.name)}"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`}</div>`;
 }
 const skeleton = () => '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
 
@@ -448,7 +450,7 @@ function renderToday() {
   $("#today-banner").innerHTML = strikes.length ? `<div class="banner violet"><b>Strike notices${strikeLines.length ? `: ${esc(strikeLines.join(", "))}` : ""}</b><span>Expect reduced service. Check before travelling.</span></div>` : "";
   const pts = watchPoints();
   $("#places-list").innerHTML = pts.length ? pts.map((p) => placeRow(p, assess(p, evs))).join("") : '<p class="empty">Add your hotel first. It is checked all day, every day.</p>';
-  const stops = state.stops.filter((s) => s.date === state.day).sort((a, b) => a.time.localeCompare(b.time));
+  const stops = allStops().filter((s) => s.date === state.day).sort((a, b) => a.time.localeCompare(b.time));
   $("#stops-list").innerHTML = stops.length ? stops.map((s) => placeRow(s, assessAt(s, evs, parisDate(s.date, s.time)), s.time)).join("")
     : '<p class="empty">Add where you plan to be and when. Each stop is checked for that time.</p>';
   const perm = "Notification" in window ? Notification.permission : "unsupported";
@@ -463,7 +465,11 @@ function renderHelp() {
     + `<div class="src-row"><span>Last update</span><span>${esc(ago(d.generated_at))}</span></div>` : '<p class="empty">No data yet.</p>';
 }
 
-function render() { renderStatus(); renderLayerChips(); renderMap(); renderSheet(); renderFeed(); renderToday(); renderHelp(); checkAlerts(); }
+function render() {
+  renderStatus(); renderLayerChips(); renderMap(); renderSheet(); renderFeed(); renderToday(); renderHelp();
+  if (typeof renderTrip === "function") renderTrip();
+  checkAlerts();
+}
 
 /* ---------- detail ---------- */
 function showDetail(ev) {
