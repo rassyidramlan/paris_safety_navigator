@@ -119,7 +119,7 @@ def road_events(raw, now):
             "pts": [[round(a, 5), round(b, 5)] for a, b in e.get("points", [])],
             "status": e["status"], "start": iso(e["start"]), "end": iso(e["end"]),
             "updated": None, "sev": None, "src": "Paris Open Data", "url": e["url"],
-            "lt": e.get("long_term", False), "why": None,
+            "lt": e.get("long_term", False), "why": None, "closed": e.get("closed", False),
             "lang": guess_lang(e["description"]),
         })
     return out

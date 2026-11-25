@@ -61,6 +61,14 @@ The itinerary says where the family will be, hour by hour, so it is **never comm
 - **Open file**: pick the `itinerary.json` file. Good for a one-off load.
 - **Use link**: paste a private `https://` link to the file, for example the raw URL of a secret GitHub gist. The app fetches it every time it opens and keeps the last copy for offline use. To change the plan mid-trip, edit the gist and every phone picks the change up. A banner lists what changed, for example "Day 4: Galeries Lafayette now 15:00", and a notification is sent if alerts are on.
 
+The itinerary's `trip.hotel` can carry `lat`, `lon` and `address`. If it does, the hotel is watched automatically and fills in the taxi card. If it doesn't, the Trip tab asks you to pin the hotel.
+
+Stops get a "Road closed … Tell the driver" note when Paris Open Data lists a road closure within 150 m around that time. The note never changes the colour.
+
+### Family setup link
+
+**Help → Share setup link** builds a link that sets up another phone in one tap: the itinerary link, always-watched places, the taxi address, the meeting point, the embassy details, and alerts. The details sit after the `#` in the link, which browsers never send to a server. Treat it like the gist link and share it in the family chat only.
+
 Each stop has a fixed `id`, so ticks survive updates. The file format is `schema_version: 1` with `days[].stops[]` (`id`, `time`, `title`, optional `end`, `notes`, `cost`, `ticket`, `maps_query`, `lat`, `lon`) and `prep[]` (`id`, `category`, `task`, `due`).
 
 ## Older files

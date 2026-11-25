@@ -102,6 +102,7 @@ def normalise(record, source, now):
         "lat": middle[0],
         "lon": middle[1],
         "kind": "official_traffic",
+        "closed": type_code == "ROAD_CLOSED",
     }
 
 

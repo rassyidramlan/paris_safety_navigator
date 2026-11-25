@@ -112,6 +112,13 @@
         <textarea id="embassy" rows="3" placeholder="Address and phone number"></textarea>
         <a class="link" href="https://www.kln.gov.my/web/guest/overseas-missions" target="_blank" rel="noopener">Find it on the official missions list</a>
       </div>
+      <h2>Family setup</h2>
+      <div class="card">
+        <p class="page-sub" style="margin:0">Set up another phone in one tap: send this link in the family chat, then open it on each phone.</p>
+        <p class="fine" id="setup-share-what" style="margin:6px 0 0"></p>
+        <button class="btn btn-wide" id="setup-share">Share setup link</button>
+        <p class="fine" id="setup-share-note" style="margin:6px 0 0;word-break:break-all"></p>
+      </div>
       <h2>How alerts work</h2>
       <div class="card rules">
         <p><span class="dot red"></span><b>Red</b> An operator notice cites a demonstration within 500 m, now or in the next 2 hours.</p>
@@ -178,6 +185,18 @@
     </div>
   </div>
 
+  <div class="scrim" id="setup" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="setup-title">
+      <div class="sheet-grab"><span></span></div>
+      <h2 class="modal-title" id="setup-title">Set up this phone for the trip?</h2>
+      <p class="page-sub" style="margin:0 0 8px">This link was shared by your family. It adds:</p>
+      <ul class="setup-list" id="setup-list"></ul>
+      <p class="fine">Saved only on this phone, like everything else in the app.</p>
+      <button class="btn btn-primary btn-wide" id="setup-apply">Set up this phone</button>
+      <button class="btn btn-wide" id="setup-skip">Not now</button>
+    </div>
+  </div>
+
   <div class="taxi" id="taxi" hidden>
     <p id="taxi-text"></p>
     <button class="btn" id="taxi-close">Close</button>
@@ -187,5 +206,6 @@
 <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js" crossorigin=""></script>
 <script src="app.js"></script>
 <script src="trip.js"></script>
+<script src="setup.js"></script>
 </body>
 </html>
