@@ -172,7 +172,7 @@ function assess(point, events) {
     else if (newsCounts(ev) && isNearTerm(ev) && near.d <= NEWS_NEAR) { l = "amber"; r = 12 - near.d / 1e3; }
     if (l && r > rank) { rank = r; best = { level: l, why: describe(ev, near), cause: ev }; }
   }
-  return best;
+  return { ...best, road: roadClosure(point, events) };
 }
 /** Status for a stop at a given time: checks one hour before to two hours after. */
 function assessAt(point, events, at) {
@@ -190,7 +190,22 @@ function assessAt(point, events, at) {
     else if (newsCounts(ev) && near.d <= NEWS_NEAR) { l = "amber"; r = 12 - near.d / 1e3; }
     if (l && r > rank) { rank = r; best = { level: l, why: describe(ev, near, true), cause: ev }; }
   }
-  return best;
+  return { ...best, road: roadClosure(point, events, at.getTime() - 3600e3, at.getTime() + 3 * 3600e3) };
+}
+/** Closed roads near a place, for the van driver. A note only: closures never change the colour. */
+const ROAD_NEAR = 150;   // metres
+function roadClosure(point, evs, from = Date.now(), to = Date.now() + 2 * 3600e3) {
+  let best = null;
+  for (const ev of evs) {
+    if (ev.cat !== "road" || !ev.closed || ev.lt || ev.status === "ended") continue;
+    const s = ev.start ? +new Date(ev.start) : -Infinity, e = ev.end ? +new Date(ev.end) : Infinity;
+    if (e < from || s > to) continue;
+    const pts = (ev.pts || []).map(([lat, lon]) => ({ lat, lon })).concat(ev.lat != null ? [{ lat: ev.lat, lon: ev.lon }] : []);
+    for (const q of pts) { const d = distance(point, q); if (d <= ROAD_NEAR && (!best || d < best.d)) best = { d, ev }; }
+  }
+  if (!best) return "";
+  const street = titleOf(best.ev).replace(/^Road closed(?: \((?:event|works)\))? — /, "");
+  return `Road closed ${fmtDist(best.d)} away${street ? ` · ${street}` : ""}. Tell the driver.`;
 }
 /** News can only ever make a place amber, and only when it names a precise place (not just an arrondissement). */
 function newsCounts(ev) { return isNews(ev) && ev.precision === "place" && ev.tag !== "strike"; }
@@ -201,6 +216,8 @@ const events = () => (state.data ? state.data.events : []);
 const parisEvents = () => events().filter(inParis);
 function watchPoints() {
   const pts = state.places.map((p) => ({ ...p, kind: "place" }));
+  const hotel = typeof tripHotel === "function" ? tripHotel() : null;
+  if (hotel && !state.places.some((p) => distance(p, hotel) < 200)) pts.unshift(hotel);
   if (state.gps && state.me) pts.unshift({ id: "me", name: "You", ...state.me, kind: "me" });
   return pts;
 }
@@ -233,6 +250,7 @@ function renderStatus() {
   const demos = pe.filter((e) => e.cat === "demo" && isNearTerm(e)).length;
   const results = watchPoints().map((p) => ({ name: p.name, ...assess(p, evs) }))
     .concat(upcomingStops().map((st) => ({ name: `${st.name} at ${st.time}`, ...assessAt(st, evs, st.at) })));
+  const feedDown = (state.data.sources || []).some((x) => x.id === "idfm" && !x.ok);
   let level, title, sub, cause = null;
   if (results.length) {
     level = worst(results.map((r) => r.level));
@@ -245,6 +263,7 @@ function renderStatus() {
     title = demos ? `${demos} demonstration notice${demos === 1 ? "" : "s"} in Paris` : "No demonstration notices";
     sub = "Add your hotel in Today for alerts near you";
   }
+  if (feedDown && level === "green") { level = "stale"; title = "Official transport feed unavailable"; sub = "Demonstration notices may be missing. News still updates"; }
   sub += ` · ${age > STALE_MIN ? "data " : "updated "}${fresh}${state.error ? " · offline" : ""}`;
   el.dataset.level = level; t.textContent = title; s.textContent = sub; el._cause = cause;
   const badgeEl = $("#feed-badge"); badgeEl.hidden = !demos; badgeEl.textContent = demos;
@@ -394,7 +413,7 @@ function newsRow(ev) {
 }
 function placeRow(p, a, time = "") {
   return `<div class="place" data-place="${esc(p.id)}">${time ? `<span class="place-time">${esc(time)}</span>` : `<span class="dot ${a.level}"></span>`}
-    <div><div class="place-name">${time ? `<span class="dot ${a.level}"></span> ` : ""}${esc(p.name)}</div><div class="place-why ${a.level}">${esc(a.why)}</div></div>
+    <div><div class="place-name">${time ? `<span class="dot ${a.level}"></span> ` : ""}${esc(p.name)}</div><div class="place-why ${a.level}">${esc(a.why)}</div>${a.road ? `<div class="place-why road">${esc(a.road)}</div>` : ""}</div>
     ${p.kind === "me" ? "" : p.kind === "trip" ? '<span class="trip-tag" title="From your itinerary">Trip</span>' : `<button class="icon-btn" data-remove="${esc(p.id)}" aria-label="Remove ${esc(p.name)}"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`}</div>`;
 }
 const skeleton = () => '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
@@ -468,6 +487,7 @@ function renderHelp() {
 function render() {
   renderStatus(); renderLayerChips(); renderMap(); renderSheet(); renderFeed(); renderToday(); renderHelp();
   if (typeof renderTrip === "function") renderTrip();
+  if (typeof renderSetupCard === "function") renderSetupCard();
   checkAlerts();
 }
 
@@ -652,10 +672,10 @@ function bind() {
     render();
   };
   for (const id of ["hotel-address", "meeting-point", "embassy"]) { const el = $(`#${id}`); el.value = store.get(id, ""); el.oninput = () => store.set(id, el.value); }
-  $("#show-taxi").onclick = () => { $("#taxi-text").textContent = $("#hotel-address").value || "Add the hotel address first."; $("#taxi").hidden = false; };
+  $("#show-taxi").onclick = () => { $("#taxi-text").textContent = $("#hotel-address").value || (typeof tripHotelText === "function" && tripHotelText()) || "Add the hotel address first."; $("#taxi").hidden = false; };
   $("#taxi-close").onclick = () => ($("#taxi").hidden = true);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { $("#detail").hidden = true; $("#add").hidden = true; $("#taxi").hidden = true; } });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { $("#detail").hidden = true; $("#add").hidden = true; $("#taxi").hidden = true; const su = $("#setup"); if (su) su.hidden = true; } });
 }
 
 window.addEventListener("DOMContentLoaded", () => {

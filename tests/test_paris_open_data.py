@@ -108,3 +108,10 @@ def test_fetch_stops_at_safety_cap_and_warns():
         events, warnings = pod.fetch(SOURCE, NOW)
     assert len(events) == pod.MAX_RECORDS
     assert "showing 500 of 600" in warnings[0]
+
+
+def test_closed_roads_are_flagged_for_the_van_check():
+    events = [pod.normalise(r, SOURCE, NOW) for r in FIXTURE["results"]]
+    closed = [e for e in events if e["closed"]]
+    assert closed and all(e["title"].startswith("Road closed") for e in closed)
+    assert not pod.normalise(by_id("20261019T000000_4436_1352"), SOURCE, NOW)["closed"]   # roadworks, road open

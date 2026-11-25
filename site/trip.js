@@ -40,7 +40,10 @@ function checkTrip(raw) {
   const t = raw.trip || {};
   return { schema_version: 1, updated_at: String(raw.updated_at || ""), revision: String(raw.revision || ""),
     trip: { title: String(t.title || "Trip"), start_date: days[0].date, end_date: days[days.length - 1].date,
-      hotel: t.hotel && t.hotel.name ? { name: String(t.hotel.name), maps_query: String(t.hotel.maps_query || t.hotel.name) } : null },
+      hotel: t.hotel && t.hotel.name ? { name: String(t.hotel.name).slice(0, 60), maps_query: String(t.hotel.maps_query || t.hotel.name),
+        address: String(t.hotel.address || "").slice(0, 200),
+        lat: num(t.hotel.lat, -90, 90) != null && num(t.hotel.lon, -180, 180) != null ? t.hotel.lat : null,
+        lon: num(t.hotel.lat, -90, 90) != null && num(t.hotel.lon, -180, 180) != null ? t.hotel.lon : null } : null },
     days, prep };
 }
 
@@ -105,6 +108,19 @@ function tripStops() {
     .map((s) => ({ id: `trip-${s.id}`, name: s.title, lat: s.lat, lon: s.lon, date: d.date, time: s.time, kind: "trip" })));
 }
 
+/** The itinerary's hotel as an always-watched place, when the file gives its location. */
+function tripHotel() {
+  const h = trip.data && trip.data.trip.hotel;
+  return h && h.lat != null ? { id: "trip-hotel", name: h.name, lat: h.lat, lon: h.lon, kind: "trip" } : null;
+}
+/** Hotel name and address for the taxi card. */
+function tripHotelText() {
+  const h = trip.data && trip.data.trip.hotel;
+  return h ? [h.name, h.address].filter(Boolean).join("\n") : "";
+}
+/** True when nothing watches the hotel yet: no location in the itinerary and no saved place. */
+const hotelUnwatched = () => !!(trip.data && trip.data.trip.hotel && !tripHotel() && !state.places.length);
+
 /* ---------- rendering ---------- */
 const fShort = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
 const shortDate = (k) => fShort.format(parisDate(k, "12:00"));
@@ -140,6 +156,7 @@ function stopRow(s, day, evs) {
       ${meta.length ? `<div class="tstop-meta">${esc(meta.join(" · "))}</div>` : ""}
       ${s.notes ? `<div class="tstop-note">${esc(s.notes)}</div>` : ""}
       ${safety && safety.level !== "green" ? `<div class="place-why ${safety.level}"><span class="dot ${safety.level}"></span> ${esc(safety.why)}</div>` : ""}
+      ${safety && safety.road ? `<div class="place-why road">${esc(safety.road)}</div>` : ""}
     </div>
     ${url ? `<a class="icon-btn" href="${esc(url)}" target="_blank" rel="noopener" aria-label="Open ${esc(s.title)} in Google Maps"><svg viewBox="0 0 24 24">${TYPE_ICON.visit}</svg></a>` : `<span class="tstop-type" aria-hidden="true"><svg viewBox="0 0 24 24">${TYPE_ICON[s.type] || TYPE_ICON.visit}</svg></span>`}
   </div>`;
@@ -181,6 +198,7 @@ function renderTrip() {
   let html = "";
   if (trip.error) html += `<p class="error">${esc(trip.error)}</p>`;
   if (trip.changes && trip.changes.lines) html +=`<div class="banner blue"><b>Itinerary updated</b>${trip.changes.lines.map((l) => `<span>${esc(l)}</span>`).join("")}<button class="link-btn" id="trip-changes-ok">Got it</button></div>`;
+  if (hotelUnwatched()) html += `<div class="banner amber"><b>Your hotel isn't being watched</b><span>Pin ${esc(d.trip.hotel.name)} so it's checked all day, every day.</span><button class="link-btn" id="trip-pin-hotel">Pin the hotel</button></div>`;
   if (!d) {
     html += `<div class="card"><h2 style="margin-top:4px">Add your itinerary</h2><p class="page-sub">Open the itinerary file, or paste a private link to it so changes reach this phone automatically.</p>${importControls()}</div>`;
   } else {
@@ -227,6 +245,11 @@ function bindTrip() {
   });
   page.addEventListener("click", (e) => {
     const d = e.target.closest("[data-tday]"); if (d) { trip.day = d.dataset.tday; return renderTrip(); }
+    if (e.target.id === "trip-pin-hotel") {
+      openAdd(); document.querySelector('input[name="when"][value="always"]').checked = true; $("#add-time").hidden = true;
+      const q = trip.data.trip.hotel.maps_query || trip.data.trip.hotel.name;
+      $("#add-query").value = q; search(q); return;
+    }
     if (e.target.id === "trip-changes-ok") { trip.changes = null; store.set("trip-changes", null); return renderTrip(); }
     if (e.target.id === "trip-link-save") {
       const v = $("#trip-link").value.trim();

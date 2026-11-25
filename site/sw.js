@@ -1,7 +1,7 @@
 /* Service worker: keeps the app shell and the last data.json available offline. */
-const SHELL = "pulse-shell-v5";
+const SHELL = "pulse-shell-v6";
 const DATA = "pulse-data";
-const SHELL_FILES = ["./", "index.html", "style.css", "app.js", "trip.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
+const SHELL_FILES = ["./", "index.html", "style.css", "app.js", "trip.js", "setup.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
   "https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css", "https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"];
 
 self.addEventListener("install", (e) => {
