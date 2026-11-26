@@ -106,6 +106,29 @@ Places and stops inside an area get a purple "Keep bags zipped and in front" not
 
 The numbers travel with the family setup link. The name doesn't, because each phone belongs to someone different.
 
+### Closed-app alerts (Web Push)
+
+Red alerts reach the family's phones even when Paris Pulse is closed. There's no server of our own: the collector sends them on its 10-minute run (`push.py`).
+
+**Organiser, once:**
+1. On your phone, open **Help → Closed-app alerts: organiser setup → Create alert keys**.
+2. In the repo's **Settings → Secrets and variables → Actions**, add `PUSH_VAPID_PRIVATE_KEY` (the private key shown) and `PUSH_TRIP_URL` (the secret gist's itinerary link). Optionally add `PUSH_VAPID_SUBJECT`, a `mailto:` address.
+3. Add a file named `push-devices.txt` to the same gist.
+4. Share the family setup link again. It now carries the public key.
+
+**Each phone:**
+1. Set up the phone from the link.
+2. Go to **Trip → Places → Alerts when the app is closed → Turn on for this phone**. On an iPhone, add Paris Pulse to the Home Screen first and open it from there.
+3. Send the code to the organiser, who pastes it as one line in `push-devices.txt`.
+4. Within about 10 minutes the phone gets "Closed-app alerts are on".
+
+**What's sent:** only red situations, using the app's own rules:
+- a demonstration within 500 m of an always-watched place (each phone's places plus the itinerary hotel), now or within 2 hours;
+- a demonstration within 500 m of an itinerary stop around its time;
+- a red Météo-France warning for Paris.
+
+Each situation is sent once; `.cache/push.json` keeps track between runs. Tapping an alert opens the event in the app. The run log is public, so it only shows counts, never names or places.
+
 ### Itinerary on the map
 
 The map shows one day of the itinerary at a time: numbered pins in visiting order, joined by a dashed line, next to the hotel. During the trip it shows today; before the trip, use **‹ ›** to change day, or tap **Show this day on the map** in the Trip tab. Pins are coloured by the safety check for that stop's time. Ticked stops fade, and the next stop is outlined. Tap a pin for the time, any warning, notes, and **Directions**. The **Trip** chip hides or shows the layer. Only stops with `lat`/`lon` appear.

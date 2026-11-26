@@ -74,6 +74,16 @@
         <div class="card settings">
           <label class="switch-row"><span><b>Alerts</b><small id="alerts-note">Notify me when a place or stop turns amber or red</small></span><input type="checkbox" id="alerts-toggle"></label>
           <button class="link-btn alert-test" id="alerts-test">Send a test alert</button>
+          <div class="push-row">
+            <b>Alerts when the app is closed</b>
+            <small id="push-status">Checking…</small>
+            <button class="btn btn-wide" id="push-on" hidden>Turn on for this phone</button>
+            <div id="push-code-box" hidden>
+              <textarea id="push-code" readonly rows="3" aria-label="This phone's alert code"></textarea>
+              <div class="row-2"><button class="btn btn-primary" id="push-share">Send code</button><button class="btn" id="push-copy">Copy</button></div>
+              <small id="push-code-note"></small>
+            </div>
+          </div>
           <label class="switch-row"><span><b>Watch where I am</b><small>Use my live position as a place</small></span><input type="checkbox" id="gps-toggle"></label>
         </div>
         <h2 id="today-title">Your own stops</h2>
@@ -139,6 +149,17 @@
         <button class="btn btn-wide" id="offline-save">Save the map for offline</button>
         <div id="offline-status" style="margin-top:6px"></div>
       </div>
+      <details class="card admin">
+        <summary><b>Closed-app alerts: organiser setup</b></summary>
+        <ol class="setup-list">
+          <li>Tap <b>Create alert keys</b> below (once, on your phone only).</li>
+          <li>On GitHub: repository <b>Settings → Secrets and variables → Actions → New repository secret</b>. Add <b>PUSH_VAPID_PRIVATE_KEY</b> (the private key below) and <b>PUSH_TRIP_URL</b> (your gist's itinerary link).</li>
+          <li>In your gist, add a file named <b>push-devices.txt</b>.</li>
+          <li>Share the family setup link again (above) and set up each phone with it.</li>
+          <li>Each phone: Trip → Places → <b>Turn on for this phone</b>, then send you its code. Paste each code as its own line in push-devices.txt.</li>
+        </ol>
+        <div id="push-admin-body"></div>
+      </details>
       <h2>How alerts work</h2>
       <div class="card rules">
         <p><span class="dot red"></span><b>Red</b> An operator notice cites a demonstration within 500 m, now or in the next 2 hours.</p>
@@ -235,6 +256,7 @@
 <script src="lost.js"></script>
 <script src="trip.js"></script>
 <script src="setup.js"></script>
+<script src="push.js"></script>
 <script src="offline.js"></script>
 <script src="forecast.js"></script>
 </body>

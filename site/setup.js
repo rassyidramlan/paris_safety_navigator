@@ -26,6 +26,7 @@ function setupPayload() {
   const places = state.places.map((p) => ({ n: p.name, a: p.lat, o: p.lon }));
   if (places.length) out.places = places;
   for (const [k, id] of Object.entries(TEXT_FIELDS)) { const v = store.get(id, ""); if (v) out[k] = v; }
+  const pk = store.get("push-key", ""); if (pk) out.pk = pk;
   return out;
 }
 
@@ -41,6 +42,7 @@ function checkSetup(raw) {
     if (!out.places.length) delete out.places;
   }
   for (const k of Object.keys(TEXT_FIELDS)) if (typeof raw[k] === "string" && raw[k].trim()) out[k] = raw[k].slice(0, 500);
+  if (typeof raw.pk === "string" && /^[A-Za-z0-9_-]{80,100}$/.test(raw.pk)) out.pk = raw.pk;
   return Object.keys(out).length ? out : null;
 }
 
@@ -59,6 +61,7 @@ function describeSetup(s) {
   if (s.meet) items.push("Family meeting point");
   if (s.embassy) items.push("Embassy details");
   if (s.lost) items.push("Family phone numbers for the lost card");
+  if (s.pk) items.push("The key for alerts when the app is closed");
   items.push("Alerts on this phone (you'll be asked to allow them)");
   return items;
 }
@@ -75,6 +78,7 @@ function showSetupOffer(s) {
     }
     for (const [k, id] of Object.entries(TEXT_FIELDS)) if (s[k]) { store.set(id, s[k]); const el = $(`#${id}`); if (el) el.value = s[k]; }
     if (s.trip) { trip.link = s.trip; store.set("trip-link", s.trip); }
+    if (s.pk) store.set("push-key", s.pk);
     // The tap on this button lets the browser ask for notification permission.
     if ("Notification" in window) {
       if (Notification.permission === "default") { try { await Notification.requestPermission(); } catch { /* ignore */ } }
@@ -103,7 +107,7 @@ async function shareSetup() {
 function renderSetupCard() {
   const p = setupPayload(), bits = [];
   if (p.trip) bits.push("itinerary link"); if (p.places) bits.push(`${p.places.length} place${p.places.length > 1 ? "s" : ""}`);
-  if (p.hotel) bits.push("hotel address"); if (p.meet) bits.push("meeting point"); if (p.embassy) bits.push("embassy"); if (p.lost) bits.push("family numbers");
+  if (p.hotel) bits.push("hotel address"); if (p.meet) bits.push("meeting point"); if (p.embassy) bits.push("embassy"); if (p.lost) bits.push("family numbers"); if (p.pk) bits.push("alert key");
   $("#setup-share-what").textContent = bits.length ? `Shares: ${bits.join(", ")}.` : "Add your itinerary link and hotel first.";
 }
 

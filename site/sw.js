@@ -1,9 +1,9 @@
 /* Service worker: keeps the app shell and the last data.json available offline. */
-const SHELL = "pulse-shell-v15";
+const SHELL = "pulse-shell-v16";
 const DATA = "pulse-data";
 const MAP = "pulse-map";       // map tiles, fonts and icons (filled by "Save the map for offline" and by browsing)
 const MAP_MAX = 3000;          // entries; oldest are dropped beyond this
-const SHELL_FILES = ["./", "index.html", "style.css", "app.js", "hotspots.js", "lost.js", "trip.js", "setup.js", "offline.js", "forecast.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
+const SHELL_FILES = ["./", "index.html", "style.css", "app.js", "hotspots.js", "lost.js", "trip.js", "setup.js", "push.js", "offline.js", "forecast.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
   "https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css", "https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"];
 
 self.addEventListener("install", (e) => {
@@ -65,7 +65,25 @@ async function trimMap(c) {
   try { const keys = await c.keys(); for (const k of keys.slice(0, Math.max(0, keys.length - MAP_MAX))) await c.delete(k); } finally { trimming = false; }
 }
 
+// Closed-app alerts sent by the collector (push.py). Every push must show a notification.
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data ? e.data.text() : "" }; }
+  e.waitUntil(self.registration.showNotification(d.title || "Paris Pulse", {
+    body: d.body || "", tag: d.tag || "pulse-push", renotify: true, requireInteraction: !!d.red,
+    icon: "icons/icon-192.png", badge: "icons/icon-192.png", vibrate: d.red ? [300, 120, 300, 120, 300] : undefined,
+    data: { url: d.url || "./" },
+  }));
+});
+
 self.addEventListener("notificationclick", (e) => {
   e.notification.close();
-  e.waitUntil(self.clients.matchAll({ type: "window" }).then((list) => (list[0] ? list[0].focus() : self.clients.openWindow("./"))));
+  const url = new URL((e.notification.data && e.notification.data.url) || "./", self.registration.scope).href;
+  const ev = (url.match(/#ev=(.+)$/) || [])[1];
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+    const c = list[0];
+    if (!c) return self.clients.openWindow(url);
+    if (ev) c.postMessage({ ev: decodeURIComponent(ev) });
+    return c.focus();
+  }));
 });
