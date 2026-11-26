@@ -11,6 +11,23 @@ const NEAR_TERM_H = 2;
 const R = { red: 500, amber: 2000, laterAmber: 1000, blocked: 500, stopAmber: 1500, order: 800 };   // metres
 const ORDER_LABEL = { ban: "Protest ban", measures: "Police measures", zone: "Security zone", weapons: "Weapons ban", drones: "Police drones at protests" };
 /** Préfecture orders that restrict protests across Paris, with no place named. */
+const WX = ["yellow", "orange", "red"];
+const WX_ADVICE = {
+  "snow and ice": "Allow extra time, wear shoes with grip, and expect delays to roads and buses. Avoid driving if you can.",
+  "strong wind": "Keep away from trees, scaffolding and the river banks. Parks and some viewpoints may close.",
+  "thunderstorms": "Get indoors when you hear thunder. Underground stations can flood briefly in heavy storms.",
+  "heavy rain": "Expect slow traffic and some flooded underpasses. Keep away from the Seine's lower quays.",
+  flooding: "Keep away from the Seine's lower quays and flooded roads. Some riverside stations may close.",
+  "extreme cold": "Dress in layers and limit long walks outside, especially for children and older relatives.",
+  heatwave: "Drink water often, stay in the shade at midday and plan indoor visits for the afternoon.",
+  weather: "Check the Météo-France page for advice and follow instructions from the authorities.",
+};
+/** Weather warnings in force at some point during a Paris day ("YYYY-MM-DD"). */
+const weatherOn = (day) => {
+  const a = parisDate(day, "00:00").getTime(), b = a + 864e5;
+  return events().filter((e) => e.cat === "weather" && +new Date(e.start) < b && +new Date(e.end) > a)
+    .sort((x, y) => WX.indexOf(y.tag) - WX.indexOf(x.tag) || (y.paris - x.paris));
+};
 const protestOrder = (ev) => ev.cat === "order" && (ev.tag === "ban" || ev.tag === "measures");
 const LEVELS = ["green", "amber", "red"];
 const PARIS = { lat: 48.8566, lon: 2.3522 };
@@ -27,6 +44,7 @@ const LINE_COLORS = {
 };
 const DARK_TEXT = new Set(["Métro 1", "Métro 3B", "Métro 5", "Métro 6", "Métro 7", "Métro 7B", "Métro 8", "Métro 9", "Métro 13", "RER C"]);
 const CAT = {
+  weather: { label: "Weather warning", plural: "Weather", color: "#f08c00", icon: '<path d="M7 17a4 4 0 0 1-.6-8A5.5 5.5 0 0 1 17 8a3.5 3.5 0 0 1 .5 7"/><path d="M12 13l-2 4h4l-2 4"/>' },
   order: { label: "Police order", plural: "Police orders", color: "#e8590c", icon: '<path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6l-7-3z"/><path d="M9 12l2 2 4-4"/>' },
   demo: { label: "Demonstration", plural: "Demonstrations", color: "#e5484d", icon: '<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>' },
   strike: { label: "Strike", plural: "Strikes", color: "#8e6cf0", icon: '<path d="M12 3v10M8.5 6.5 12 3l3.5 3.5"/><rect x="4" y="13" width="16" height="7" rx="2"/>' },
@@ -58,6 +76,10 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const fmt = (opts) => new Intl.DateTimeFormat("en-GB", { timeZone: TZ, ...opts });
 const fTime = fmt({ hour: "2-digit", minute: "2-digit" });
+const fWkTime = fmt({ weekday: "short", hour: "2-digit", minute: "2-digit" });
+/** "07:00–21:00" within a day, "Wed 07:00 – Thu 07:00" across days (Paris time). */
+const span = (a, b) => (dayKey(new Date(a)) === dayKey(new Date(b)) ? `${fTime.format(new Date(a))}–${fTime.format(new Date(b))}` : `${fWkTime.format(new Date(a))} – ${fWkTime.format(new Date(b))}`);
+const untilText = (b) => `until ${dayKey(new Date(b)) === dayKey(new Date()) ? fTime.format(new Date(b)) : fWkTime.format(new Date(b))}`;
 const fDay = fmt({ weekday: "short", day: "numeric", month: "short" });
 const fFull = fmt({ weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const fKey = new Intl.DateTimeFormat("en-CA", { timeZone: TZ });
@@ -152,7 +174,7 @@ function nearestStop(ev, point) {
 }
 function inParis(ev) {
   const near = nearestStop(ev, PARIS);
-  if (!near) return isNews(ev) || ev.cat === "order" || (ev.modes || []).some((m) => m !== "Bus");
+  if (!near) return isNews(ev) || ev.cat === "order" || ev.cat === "weather" || (ev.modes || []).some((m) => m !== "Bus");
   return near.d <= PARIS_RADIUS;
 }
 function describe(ev, near, at) {
@@ -270,6 +292,13 @@ function renderStatus() {
     sub = "Add your hotel in Today for alerts near you";
   }
   const cityOrder = pe.find((e) => protestOrder(e) && e.status === "active" && !(e.stops || []).length);
+  // Météo-France warnings for Paris itself: red turns the card red, orange amber, yellow is mentioned.
+  const wx = pe.filter((e) => e.cat === "weather" && e.paris && e.status === "active").sort((a, b) => WX.indexOf(b.tag) - WX.indexOf(a.tag))[0];
+  if (wx && wx.tag !== "yellow" && (level === "green" || (wx.tag === "red" && level !== "red"))) {
+    level = wx.tag === "red" ? "red" : "amber"; cause = wx;
+    title = `${wx.tag === "red" ? "Red" : "Orange"} weather warning in Paris`;
+    sub = `${wx.hazard[0].toUpperCase()}${wx.hazard.slice(1)} ${untilText(wx.end)} · tap for advice`;
+  } else if (wx && level === "green") sub = `Yellow warning: ${wx.hazard}. ${sub}`;
   if (cityOrder && level === "green") { level = "amber"; cause = cityOrder; title = "Police protest restrictions in Paris today"; sub = "Préfecture de Police order · tap to read"; }
   if (feedDown && level === "green") { level = "stale"; title = "Official transport feed unavailable"; sub = "Demonstration notices may be missing. News still updates"; }
   sub += ` · ${age > STALE_MIN ? "data " : "updated "}${fresh}${state.error ? " · offline" : ""}`;
@@ -409,7 +438,7 @@ function bindSheet() {
 }
 
 /* ---------- lists ---------- */
-const order = { demo: 0, order: 1, news: 2, strike: 3, disruption: 4, works: 5, road: 6 };
+const order = { demo: 0, order: 1, weather: 2, news: 3, strike: 4, disruption: 5, works: 6, road: 7 };
 const byRank = (a, b) => (order[a.cat] - order[b.cat])
   || (isNews(a) && isNews(b) ? ((b.precision === "place") - (a.precision === "place")) || (+new Date(b.start) - +new Date(a.start)) : 0)
   || ((a.status === "active" ? 0 : 1) - (b.status === "active" ? 0 : 1))
@@ -460,7 +489,7 @@ function renderFeed() {
   const base = events().filter((e) => (state.wide || inParis(e)) && !(e.cat === "road" && e.lt));
   const q = state.feedQuery.trim().toLowerCase();
   const matches = (e) => !q || [titleOf(e), textOf(e), ...(e.lines || []), ...(e.stops || []).map((s) => s.n)].join(" ").toLowerCase().includes(q);
-  const cats = ["all", "demo", "order", "news", "strike", "disruption", "works", "road"];
+  const cats = ["all", "demo", "order", "weather", "news", "strike", "disruption", "works", "road"];
   const count = (k) => base.filter((e) => (k === "all" ? e.cat !== "road" : e.cat === k) && matches(e)).length;
   $("#feed-filters").innerHTML = cats.map((k) => `<button class="chip" role="tab" data-filter="${k}" aria-selected="${state.feedFilter === k}">${k === "all" ? "All" : CAT[k].plural} <span class="n">${count(k)}</span></button>`).join("")
     + `<button class="chip" data-wide="1" aria-pressed="${state.wide}">Suburbs</button>`;
@@ -527,6 +556,7 @@ function showDetail(ev) {
     <p class="detail-meta"><b>${esc(timing(ev))}</b>${ev.end && ev.status !== "active" ? ` · until ${esc(when(ev.end))}` : ""}${near ? ` · ${near}` : ""}</p>
     ${lines ? `<p class="ev-lines" style="margin:0 0 12px">${lines}</p>` : ""}
     ${textOf(ev) ? `<div class="msg">${translated ? `<p class="msg-note"><span>${orig ? "Original French" : "Translated from French"}</span><button id="toggle-orig">${orig ? "Show English" : "Show original"}</button></p>` : ""}${esc(textOf(ev))}</div>` : ""}
+    ${ev.cat === "weather" ? `<p class="kv">${esc(WX_ADVICE[ev.hazard] || WX_ADVICE.weather)}</p>` : ""}
     ${ev.cat === "order" ? `<p class="kv">${(ev.stops || []).length ? "Pins show the places the order names. " : "Applies across Paris: the order names no specific place. "}The exact perimeter is on the map attached to the official order.</p>` : ""}
     ${ev.why ? `<p class="kv">Flagged because the operator wrote <b>“${esc(ev.why)}”</b></p>` : ""}
     ${ev.stops && ev.stops.length ? `<p class="kv">Stops: <b>${esc(ev.stops.map((s) => s.n).join(", "))}</b></p>` : ""}

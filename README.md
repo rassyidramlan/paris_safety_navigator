@@ -71,6 +71,15 @@ Stops get a "Road closed … Tell the driver" note when Paris Open Data lists a 
 
 In the app, orders are a **Police orders** category. An order naming a place within 800 m of your place or stop turns it amber, never red. An order restricting protests across Paris with no place named turns the status card amber ("Police protest restrictions in Paris today"). Exact perimeters are only drawn on maps attached to the PDFs, so the app links to the official order. **Help → Sources** shows how many bulletins and orders were read.
 
+### Weather warnings
+
+`weather.py` reads Météo-France's warnings for Paris and the other Île-de-France départements from MeteoAlarm's public feed, which needs no key. Levels follow the Météo-France colours: yellow, orange and red.
+
+- **Status card:** a red warning for Paris turns it red, an orange one amber, and a yellow one is mentioned in the second line.
+- **Trip:** each day shows the warnings in force that day, including those for La Vallée (Seine-et-Marne), Versailles (Yvelines) and CDG (Val-d'Oise).
+- **Detail:** tapping a warning shows short practical advice for that hazard.
+- **Feed:** warnings have their own **Weather** filter.
+
 ### Itinerary on the map
 
 The map shows one day of the itinerary at a time: numbered pins in visiting order, joined by a dashed line, next to the hotel. During the trip it shows today; before the trip, use **‹ ›** to change day, or tap **Show this day on the map** in the Trip tab. Pins are coloured by the safety check for that stop's time. Ticked stops fade, and the next stop is outlined. Tap a pin for the time, any warning, notes, and **Directions**. The **Trip** chip hides or shows the layer. Only stops with `lat`/`lon` appear.

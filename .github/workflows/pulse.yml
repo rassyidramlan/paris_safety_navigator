@@ -9,7 +9,7 @@ on:
     - cron: "4,14,24,34,44,54 * * * *"
   push:
     branches: [main]
-    paths: ["site/**", "collect.py", "news.py", "translate.py", "prim_disruptions.py", "paris_open_data.py", "prefecture.py", "sources.json", "data/idfm_stops.json", "data/paris_places.json", ".github/workflows/pulse.yml"]
+    paths: ["site/**", "collect.py", "news.py", "translate.py", "prim_disruptions.py", "paris_open_data.py", "prefecture.py", "weather.py", "sources.json", "data/idfm_stops.json", "data/paris_places.json", ".github/workflows/pulse.yml"]
 
 permissions:
   contents: read

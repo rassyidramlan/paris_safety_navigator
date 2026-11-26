@@ -323,3 +323,17 @@ label.btn { cursor: pointer; }
 .pill.order { background: rgba(232, 89, 12, .14); color: #b23c0a; }
 .src-note { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
 @media (prefers-color-scheme: dark) { .tile.order, .pill.order { color: #ff9a5c; background: rgba(255, 140, 70, .16); } }
+
+/* ---------- Weather warnings ---------- */
+.tile.weather { background: rgba(240, 140, 0, .16); color: #b86200; }
+.pill.weather { background: rgba(240, 140, 0, .16); color: #9a5200; }
+.banner.wx { display: block; width: 100%; text-align: left; border: 0; font: inherit; cursor: pointer; margin: 8px 0 4px; }
+.banner.wx span { display: block; }
+.banner.wx.yellow { background: rgba(250, 204, 21, .22); color: #7a5b00; }
+.banner.wx.orange { background: rgba(240, 140, 0, .18); color: #9a4d00; }
+.banner.wx.red { background: var(--red-bg); color: var(--red-text); }
+@media (prefers-color-scheme: dark) {
+  .tile.weather, .pill.weather { color: #ffb347; background: rgba(255, 170, 60, .16); }
+  .banner.wx.yellow { color: #ffd84d; } .banner.wx.orange { color: #ffb347; }
+}
+.banner .link-btn { display: block; }

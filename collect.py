@@ -11,7 +11,8 @@ Output (all times ISO 8601 UTC):
      "events": [{"id","kind","cat","title","text","lines","modes","stops":[{"n","lat","lon"}],
                  "lat","lon","pts","status","start","end","updated","sev","src","url","lt"}]}
 
-cat is one of: "order" (Préfecture de Police order: protest ban, security zone, police measures),
+cat is one of: "weather" (Météo-France warning; tag = yellow/orange/red, paris = true for Paris itself),
+"order" (Préfecture de Police order: protest ban, security zone, police measures),
 "demo" (operator cites a demonstration), "strike" (operator cites a strike /
 social movement), "disruption" (unplanned
 transport problem), "works" (planned transport works), "road" (road works/closures).
@@ -27,6 +28,7 @@ import news
 import paris_open_data
 import prefecture
 import prim_disruptions
+import weather
 
 ROOT = Path(__file__).parent
 STOPS_PATH = ROOT / "data" / "idfm_stops.json"
@@ -177,6 +179,16 @@ def collect(now=None, api_key=None, locator=None, config=None):
                         "error": None, "count": len(pev), "feed_updated": None, "note": note})
     except Exception as exc:
         sources.append({"id": "prefecture", "name": "Préfecture de Police orders", "ok": False,
+                        "error": str(exc)[:200], "count": 0, "feed_updated": None})
+
+    # Météo-France warnings for Paris and Île-de-France (MeteoAlarm, no key).
+    try:
+        wev = weather.fetch(now)
+        events += wev
+        sources.append({"id": "weather", "name": "Météo-France warnings", "ok": True, "error": None,
+                        "count": len(wev), "feed_updated": None})
+    except Exception as exc:
+        sources.append({"id": "weather", "name": "Météo-France warnings", "ok": False,
                         "error": str(exc)[:200], "count": 0, "feed_updated": None})
 
     return {"generated_at": iso(now), "sources": sources, "events": events}

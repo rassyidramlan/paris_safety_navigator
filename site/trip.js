@@ -309,6 +309,7 @@ function renderPlan() {
     <div class="tday-head"><div><h2>${esc(day.title)}</h2><p class="page-sub">${esc(fDay.format(parisDate(day.date, "12:00")))}${day.amended ? ' · <span class="tag">Amended</span>' : ""}</p></div></div>
     <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>
     <p class="fine">${n} of ${day.stops.length} done</p>
+    ${weatherOn(day.date).slice(0, 2).map((w) => `<button class="banner wx ${esc(w.tag)}" data-ev="${esc(w.id)}"><b>${esc(w.title)}</b><span>${esc(span(w.start, w.end))} · tap for advice</span></button>`).join("")}
     ${day.constraints.length ? `<div class="banner amber"><b>Keep in mind</b><span>${esc(day.constraints.join(" · "))}</span></div>` : ""}
     <div class="list">${day.stops.map((s) => stopRow(s, day, evs)).join("") || '<p class="empty">Nothing planned.</p>'}</div>
     ${located(day).length ? `<button class="btn btn-wide" data-showday="${esc(day.id)}">Show this day on the map</button>` : ""}
@@ -382,6 +383,7 @@ function bindTrip() {
   });
   page.addEventListener("click", (e) => {
     const d = e.target.closest("[data-tday]"); if (d) { trip.day = d.dataset.tday; return renderTrip(); }
+    const wb = e.target.closest("[data-ev]"); if (wb) { const ev = events().find((x) => x.id === wb.dataset.ev); if (ev) showDetail(ev); return; }
     const sd = e.target.closest("[data-showday]"); if (sd) return showDayOnMap(sd.dataset.showday);
     if (e.target.id === "trip-pin-hotel") {
       openAdd(); document.querySelector('input[name="when"][value="always"]').checked = true; $("#add-time").hidden = true;
