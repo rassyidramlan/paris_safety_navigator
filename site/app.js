@@ -539,6 +539,7 @@ function render() {
   renderStatus(); renderLayerChips(); renderMap(); renderSheet(); renderFeed(); renderToday(); renderHelp();
   if (typeof renderTrip === "function") renderTrip();
   if (typeof renderSetupCard === "function") renderSetupCard();
+  if (typeof renderNowWeather === "function") { renderNowWeather(); refreshForecast(); }
   checkAlerts();
 }
 

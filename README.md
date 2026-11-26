@@ -80,6 +80,10 @@ In the app, orders are a **Police orders** category. An order naming a place wit
 - **Detail:** tapping a warning shows short practical advice for that hazard.
 - **Feed:** warnings have their own **Weather** filter.
 
+### Temperature and forecast
+
+The phone gets the current temperature and a 16-day daily forecast from Open-Meteo, which is free and needs no key. It asks for central Paris, plus any itinerary stop more than 15 km away (La Vallée, Versailles, CDG), in one request. The status card shows Paris now, for example "4° Snow". Each trip day shows the low and high, conditions, and the chance of rain or how much snow, for Paris and for that day's far stops. The last forecast is kept on the phone for offline use and refreshed every 30 minutes. Nothing about the itinerary goes through the public data file.
+
 ### Itinerary on the map
 
 The map shows one day of the itinerary at a time: numbered pins in visiting order, joined by a dashed line, next to the hotel. During the trip it shows today; before the trip, use **‹ ›** to change day, or tap **Show this day on the map** in the Trip tab. Pins are coloured by the safety check for that stop's time. Ticked stops fade, and the next stop is outlined. Tap a pin for the time, any warning, notes, and **Directions**. The **Trip** chip hides or shows the layer. Only stops with `lat`/`lon` appear.
