@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:cap="urn:oasis:names:tc:emergency:cap:1.2">
+  <id>https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-france</id>
+  <title>MeteoAlarm France</title>
+  <updated>2026-12-09T05:00:00+00:00</updated>
+  <entry>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-france/a1</id>
+    <title>Orange Snow-ice Warning issued for France - Paris</title>
+    <link hreflang="en" href="https://feeds.meteoalarm.org/api/v1/warnings/feeds-france/a1"/>
+    <cap:identifier>2.49.0.0.250.0.FR.20261209050000.a1</cap:identifier>
+    <cap:status>Actual</cap:status>
+    <cap:message_type>Alert</cap:message_type>
+    <cap:areaDesc>Paris</cap:areaDesc>
+    <cap:event>Severe snow-ice warning</cap:event>
+    <cap:severity>Severe</cap:severity>
+    <cap:effective>2026-12-09T05:00:00+00:00</cap:effective>
+    <cap:onset>2026-12-09T06:00:00+00:00</cap:onset>
+    <cap:expires>2026-12-10T06:00:00+00:00</cap:expires>
+    <cap:geocode><valueName>EMMA_ID</valueName><value>FR075</value></cap:geocode>
+  </entry>
+  <entry>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-france/a2</id>
+    <title>Yellow Wind Warning issued for France - Seine-et-Marne</title>
+    <cap:message_type>Alert</cap:message_type>
+    <cap:areaDesc>Seine-et-Marne</cap:areaDesc>
+    <cap:event>Moderate wind warning</cap:event>
+    <cap:severity>Moderate</cap:severity>
+    <cap:onset>2026-12-10T12:00:00+00:00</cap:onset>
+    <cap:expires>2026-12-10T21:00:00+00:00</cap:expires>
+    <cap:geocode><valueName>EMMA_ID</valueName><value>FR077</value></cap:geocode>
+  </entry>
+  <entry>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-france/a3</id>
+    <title>Red Wind Warning issued for France - Finistère</title>
+    <cap:message_type>Alert</cap:message_type>
+    <cap:areaDesc>Finistère</cap:areaDesc>
+    <cap:event>Extreme wind warning</cap:event>
+    <cap:severity>Extreme</cap:severity>
+    <cap:onset>2026-12-09T06:00:00+00:00</cap:onset>
+    <cap:expires>2026-12-10T06:00:00+00:00</cap:expires>
+    <cap:geocode><valueName>EMMA_ID</valueName><value>FR029</value></cap:geocode>
+  </entry>
+  <entry>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-france/a4</id>
+    <title>Green warning - Hauts-de-Seine</title>
+    <cap:message_type>Alert</cap:message_type>
+    <cap:areaDesc>Hauts-de-Seine</cap:areaDesc>
+    <cap:event>Minor rain warning</cap:event>
+    <cap:severity>Minor</cap:severity>
+    <cap:onset>2026-12-09T06:00:00+00:00</cap:onset>
+    <cap:expires>2026-12-10T06:00:00+00:00</cap:expires>
+  </entry>
+  <entry>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-france/a5</id>
+    <title>Yellow Rain Warning - Val-de-Marne (expired)</title>
+    <cap:message_type>Alert</cap:message_type>
+    <cap:areaDesc>Val-de-Marne</cap:areaDesc>
+    <cap:event>Moderate rain warning</cap:event>
+    <cap:severity>Moderate</cap:severity>
+    <cap:onset>2026-12-07T06:00:00+00:00</cap:onset>
+    <cap:expires>2026-12-08T06:00:00+00:00</cap:expires>
+  </entry>
+  <entry>
+    <id>https://feeds.meteoalarm.org/api/v1/warnings/feeds-france/a6</id>
+    <title>Yellow Thunderstorm Warning - Paris (cancelled)</title>
+    <cap:message_type>Cancel</cap:message_type>
+    <cap:areaDesc>Paris</cap:areaDesc>
+    <cap:event>Moderate thunderstorm warning</cap:event>
+    <cap:severity>Moderate</cap:severity>
+    <cap:onset>2026-12-09T06:00:00+00:00</cap:onset>
+    <cap:expires>2026-12-10T06:00:00+00:00</cap:expires>
+  </entry>
+</feed>
