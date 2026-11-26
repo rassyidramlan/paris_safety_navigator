@@ -102,6 +102,13 @@
         <a class="sos" href="tel:18"><b>18</b><span>Fire</span></a>
       </div>
       <p class="fine">114 is the emergency number by text message.</p>
+      <h2>If someone gets lost</h2>
+      <div class="card">
+        <p class="page-sub" style="margin:0 0 8px">A card in French to show a police officer or shop staff, with your family's numbers, the hotel and the meeting point.</p>
+        <input class="search" id="lost-name" type="text" autocomplete="off" placeholder="Name of the person carrying this phone (optional)" aria-label="Name of the person carrying this phone">
+        <textarea id="lost-contacts" rows="3" placeholder="Who to call, one per line: Rassyid (father) +60 12 345 6789" aria-label="Family phone numbers" style="margin-top:8px"></textarea>
+        <button class="btn btn-wide" id="show-lost">Show lost card</button>
+      </div>
       <h2>For the taxi</h2>
       <div class="card">
         <textarea id="hotel-address" rows="3" placeholder="Hotel name and full address"></textarea>
@@ -215,6 +222,11 @@
     </div>
   </div>
 
+  <div class="lost" id="lost" hidden role="dialog" aria-modal="true" aria-label="Lost card">
+    <div class="lost-body" id="lost-body"></div>
+    <button class="btn" id="lost-close">Close</button>
+  </div>
+
   <div class="taxi" id="taxi" hidden>
     <p id="taxi-text"></p>
     <button class="btn" id="taxi-close">Close</button>
@@ -224,6 +236,7 @@
 <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js" crossorigin=""></script>
 <script src="app.js"></script>
 <script src="hotspots.js"></script>
+<script src="lost.js"></script>
 <script src="trip.js"></script>
 <script src="setup.js"></script>
 <script src="offline.js"></script>

@@ -7,7 +7,7 @@
 "use strict";
 
 const SETUP_KEY = "setup=";
-const TEXT_FIELDS = { hotel: "hotel-address", meet: "meeting-point", embassy: "embassy" };
+const TEXT_FIELDS = { hotel: "hotel-address", meet: "meeting-point", embassy: "embassy", lost: "lost-contacts" };
 
 function b64url(text) {
   const bytes = new TextEncoder().encode(text);
@@ -58,6 +58,7 @@ function describeSetup(s) {
   if (s.hotel) items.push("Hotel address for the taxi card");
   if (s.meet) items.push("Family meeting point");
   if (s.embassy) items.push("Embassy details");
+  if (s.lost) items.push("Family phone numbers for the lost card");
   items.push("Alerts on this phone (you'll be asked to allow them)");
   return items;
 }
@@ -101,7 +102,7 @@ async function shareSetup() {
 function renderSetupCard() {
   const p = setupPayload(), bits = [];
   if (p.trip) bits.push("itinerary link"); if (p.places) bits.push(`${p.places.length} place${p.places.length > 1 ? "s" : ""}`);
-  if (p.hotel) bits.push("hotel address"); if (p.meet) bits.push("meeting point"); if (p.embassy) bits.push("embassy");
+  if (p.hotel) bits.push("hotel address"); if (p.meet) bits.push("meeting point"); if (p.embassy) bits.push("embassy"); if (p.lost) bits.push("family numbers");
   $("#setup-share-what").textContent = bits.length ? `Shares: ${bits.join(", ")}.` : "Add your itinerary link and hotel first.";
 }
 

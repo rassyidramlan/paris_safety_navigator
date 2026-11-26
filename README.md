@@ -92,6 +92,17 @@ The phone gets the current temperature and a 16-day daily forecast from Open-Met
 
 Places and stops inside an area get a purple "Keep bags zipped and in front" note. The note never changes a colour. The **Pickpockets** map chip, off by default, shows the areas, and tapping one shows the reason and its source. Help has a short tips card.
 
+### Lost card
+
+**Help → If someone gets lost** holds the name of the person carrying the phone (optional) and the family's phone numbers, one per line. **Show lost card** opens a full-screen card in French, with English underneath, to show a police officer or shop staff:
+- "J'ai perdu ma famille… Pouvez-vous appeler ma famille ?" (I've lost my family… please call my family)
+- tap-to-call numbers
+- the hotel (from the taxi address, or the itinerary's hotel)
+- the meeting point
+- 112 and 17
+
+The numbers travel with the family setup link. The name doesn't, because each phone belongs to someone different.
+
 ### Itinerary on the map
 
 The map shows one day of the itinerary at a time: numbered pins in visiting order, joined by a dashed line, next to the hotel. During the trip it shows today; before the trip, use **‹ ›** to change day, or tap **Show this day on the map** in the Trip tab. Pins are coloured by the safety check for that stop's time. Ticked stops fade, and the next stop is outlined. Tap a pin for the time, any warning, notes, and **Directions**. The **Trip** chip hides or shows the layer. Only stops with `lat`/`lon` appear.
