@@ -65,6 +65,10 @@ The itinerary's `trip.hotel` can carry `lat`, `lon` and `address`. If it does, t
 
 Stops get a "Road closed … Tell the driver" note when Paris Open Data lists a road closure within 150 m around that time. The note never changes the colour.
 
+### Itinerary on the map
+
+The map shows one day of the itinerary at a time: numbered pins in visiting order, joined by a dashed line, next to the hotel. During the trip it shows today; before the trip, use **‹ ›** to change day, or tap **Show this day on the map** in the Trip tab. Pins are coloured by the safety check for that stop's time. Ticked stops fade, and the next stop is outlined. Tap a pin for the time, any warning, notes, and **Directions**. The **Trip** chip hides or shows the layer. Only stops with `lat`/`lon` appear.
+
 ### Family setup link
 
 **Help → Share setup link** builds a link that sets up another phone in one tap: the itinerary link, always-watched places, the taxi address, the meeting point, the embassy details, and alerts. The details sit after the `#` in the link, which browsers never send to a server. Treat it like the gist link and share it in the family chat only.
