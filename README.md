@@ -69,6 +69,14 @@ Stops get a "Road closed … Tell the driver" note when Paris Open Data lists a 
 
 The map shows one day of the itinerary at a time: numbered pins in visiting order, joined by a dashed line, next to the hotel. During the trip it shows today; before the trip, use **‹ ›** to change day, or tap **Show this day on the map** in the Trip tab. Pins are coloured by the safety check for that stop's time. Ticked stops fade, and the next stop is outlined. Tap a pin for the time, any warning, notes, and **Directions**. The **Trip** chip hides or shows the layer. Only stops with `lat`/`lon` appear.
 
+### Now / Next card
+
+During the trip, the list at the bottom of the map starts with what's happening now and what comes next. It shows the stop's time, a countdown, any warning or road closure, and the item after it. **Done** ticks the stop, the same as in the Trip tab, and the pin button shows the stop on the map. In the evening the card shows tomorrow's first item.
+
+### Offline map
+
+**Help → Save the map for offline** downloads central Paris down to street level, the area around every itinerary stop outside Paris (La Vallée, Versailles, CDG), and the map's fonts and icons, about 15–25 MB in all. The service worker serves them when there's no signal. Map areas you've browsed are kept too, up to 3,000 files.
+
 ### Family setup link
 
 **Help → Share setup link** builds a link that sets up another phone in one tap: the itinerary link, always-watched places, the taxi address, the meeting point, the embassy details, and alerts. The details sit after the `#` in the link, which browsers never send to a server. Treat it like the gist link and share it in the family chat only.

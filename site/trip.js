@@ -121,6 +121,53 @@ function tripHotelText() {
 /** True when nothing watches the hotel yet: no location in the itinerary and no saved place. */
 const hotelUnwatched = () => !!(trip.data && trip.data.trip.hotel && !tripHotel() && !state.places.length);
 
+/* ---------- "Now / Next" card at the top of the map's list ---------- */
+const fmtIn = (ms) => {
+  const m = Math.round(ms / 60e3);
+  if (m <= 0) return "now";
+  return m < 60 ? `in ${m} min` : `in ${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ""}`;
+};
+/** What's happening now and next today, skipping ticked stops. */
+function nowNext() {
+  if (!trip.data) return null;
+  const today = dayKey(new Date()), days = trip.data.days, day = days.find((d) => d.date === today);
+  if (!day) return null;
+  const now = Date.now(), at = (s) => parisDate(day.date, s.time).getTime();
+  const open = day.stops.filter((s) => !trip.done[s.id]);
+  // Current: started, and its end (or the next item's start) is still ahead.
+  let cur = null;
+  for (let i = 0; i < day.stops.length; i++) {
+    const s = day.stops[i], until = s.end ? parisDate(day.date, s.end).getTime() : day.stops[i + 1] ? at(day.stops[i + 1]) : at(s) + 60 * 60e3;
+    if (!trip.done[s.id] && at(s) <= now && until > now) cur = s;
+  }
+  const after = open.filter((s) => at(s) > now && s !== cur);
+  const tomorrow = after.length ? null : days[days.indexOf(day) + 1];
+  return { day, cur, next: after[0] || null, then: after[1] || null, tomorrow, at };
+}
+
+function nextCardHtml() {
+  const n = nowNext(); if (!n || (!n.cur && !n.next && !n.tomorrow)) return "";
+  const now = Date.now(), evs = events();
+  const main = n.cur || n.next, follow = n.cur ? n.next : n.then;
+  if (!main) {
+    const t = n.tomorrow, first = t && t.stops[0];
+    return `<div class="nextcard"><p class="nc-label">Done for today</p>${first ? `<p class="nc-follow">Tomorrow · ${esc(first.time)} ${esc(first.title)}</p>` : ""}</div>`;
+  }
+  const a = main.lat != null && state.data ? assessAt(main, evs, parisDate(n.day.date, main.time)) : null;
+  const label = n.cur ? `Now${main.end ? ` · until ${esc(main.end)}` : ""}` : `Next · ${esc(fmtIn(n.at(main) - now))}`;
+  return `<div class="nextcard">
+    <div class="nc-top">
+      <div class="nc-text"><p class="nc-label">${label}</p><p class="nc-title"><span>${esc(main.time)}</span> ${esc(main.title)}</p></div>
+      ${main.lat != null ? `<button class="icon-btn" data-nmap="${esc(main.id)}" aria-label="Show ${esc(main.title)} on the map"><svg viewBox="0 0 24 24">${TYPE_ICON.visit}</svg></button>` : ""}
+      <button class="nc-done" data-ntick="${esc(main.id)}">Done</button>
+    </div>
+    ${a && a.level !== "green" ? `<p class="place-why ${a.level}"><span class="dot ${a.level}"></span> ${esc(a.why)}</p>` : ""}
+    ${a && a.road ? `<p class="place-why road">${esc(a.road)}</p>` : ""}
+    ${main.notes ? `<p class="nc-note">${esc(main.notes)}</p>` : ""}
+    ${follow ? `<p class="nc-follow">Then ${esc(follow.time)} ${esc(follow.title)} · ${esc(fmtIn(n.at(follow) - now))}</p>` : ""}
+  </div>`;
+}
+
 /* ---------- on the map: one day's stops, numbered, with the order as a dashed line ---------- */
 /** The day the map shows: today during the trip, otherwise the day picked in the Trip tab. */
 function mapDay() {
@@ -358,6 +405,18 @@ function bindTrip() {
 
 window.addEventListener("DOMContentLoaded", () => {
   bindTrip();
+  $("#sheet-body").addEventListener("click", (e) => {
+    const t = e.target.closest("[data-ntick]");
+    if (t) { trip.done[t.dataset.ntick] = true; store.set("trip-done", trip.done); return render(); }
+    const m = e.target.closest("[data-nmap]");
+    if (m) {
+      const d = nowNext().day, s = d.stops.find((x) => x.id === m.dataset.nmap);
+      trip.mapDay = d.id; state.layers.trip = true; store.set("layers2", state.layers); renderLayerChips(); renderMap();
+      fitTo([s]); setSnap("peek");
+    }
+  });
+  // Keep the countdown honest while the app stays open.
+  setInterval(() => { if (document.visibilityState === "visible" && nowNext()) renderSheet(); }, 60e3);
   $("#dayswitch").addEventListener("click", (e) => {
     const step = e.target.closest("[data-dstep]");
     if (step) {

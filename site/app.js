@@ -438,7 +438,7 @@ function renderSheet() {
   const now = pe.filter((e) => (e.cat === "demo" && isNearTerm(e)) || ((e.cat === "strike" || e.cat === "disruption") && e.status === "active")).sort(byRank);
   const later = pe.filter((e) => e.cat === "demo" && !isNearTerm(e)).sort(byRank);
   const pts = watchPoints();
-  let html = `<p class="sheet-title">${pts.length ? "Near your places" : "Happening in Paris"}</p>`;
+  let html = (typeof nextCardHtml === "function" ? nextCardHtml() : "") + `<p class="sheet-title">${pts.length ? "Near your places" : "Happening in Paris"}</p>`;
   if (pts.length) html += `<div class="list">${pts.map((p) => placeRow(p, assess(p, evs))).join("")}</div><p class="section-label">Happening now</p>`;
   html += now.length ? `<div class="list">${now.map(row).join("")}</div>` : '<p class="empty">No demonstration, strike or Métro/RER notices right now.</p>';
   if (later.length) html += `<p class="section-label">Coming up</p><div class="list">${later.slice(0, 10).map(row).join("")}</div>`;
