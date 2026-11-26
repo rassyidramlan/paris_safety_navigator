@@ -212,6 +212,12 @@ def main(argv=None):
         fr = sum(e.get("lang") == "fr" for e in transport)
         print(f"transport notices in French: {fr} of {len(transport)}")
     print(f"wrote {len(result['events'])} events to {args.out}")
+    # Closed-app alerts (Web Push). Only counts are printed: the run log of a public repo is public.
+    try:
+        import push
+        print(f"closed-app alerts: {push.run(result['events'], datetime.now(timezone.utc))}")
+    except Exception as exc:
+        print(f"closed-app alerts: error ({type(exc).__name__})")
     # Fail the run only if every source failed, so the old data stays deployed.
     return 0 if any(s["ok"] for s in result["sources"]) else 1
 

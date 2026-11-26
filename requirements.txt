@@ -7,3 +7,4 @@ feedparser>=6.0
 python-dateutil>=2.9
 tzdata>=2024.1
 pypdf>=5.0
+pywebpush>=2.0
