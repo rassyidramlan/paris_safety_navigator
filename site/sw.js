@@ -1,9 +1,9 @@
 /* Service worker: keeps the app shell and the last data.json available offline. */
-const SHELL = "pulse-shell-v11";
+const SHELL = "pulse-shell-v12";
 const DATA = "pulse-data";
 const MAP = "pulse-map";       // map tiles, fonts and icons (filled by "Save the map for offline" and by browsing)
 const MAP_MAX = 3000;          // entries; oldest are dropped beyond this
-const SHELL_FILES = ["./", "index.html", "style.css", "app.js", "trip.js", "setup.js", "offline.js", "forecast.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
+const SHELL_FILES = ["./", "index.html", "style.css", "app.js", "hotspots.js", "trip.js", "setup.js", "offline.js", "forecast.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
   "https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css", "https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"];
 
 self.addEventListener("install", (e) => {
