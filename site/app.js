@@ -734,7 +734,7 @@ function bind() {
   $("#show-taxi").onclick = () => { $("#taxi-text").textContent = $("#hotel-address").value || (typeof tripHotelText === "function" && tripHotelText()) || "Add the hotel address first."; $("#taxi").hidden = false; };
   $("#taxi-close").onclick = () => ($("#taxi").hidden = true);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") load(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { $("#detail").hidden = true; $("#add").hidden = true; $("#taxi").hidden = true; const su = $("#setup"); if (su) su.hidden = true; } });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { $("#detail").hidden = true; $("#add").hidden = true; $("#taxi").hidden = true; const su = $("#setup"); if (su) su.hidden = true; const lo = $("#lost"); if (lo) lo.hidden = true; } });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
