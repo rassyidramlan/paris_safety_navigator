@@ -219,7 +219,7 @@ textarea { width: 100%; border: 0; background: var(--surface-2); border-radius: 
 
 /* Bottom navigation */
 .tabs { position: absolute; z-index: 30; left: 0; right: 0; bottom: 0; height: calc(var(--nav-h) + var(--safe-b)); padding-bottom: var(--safe-b);
-  display: grid; grid-template-columns: repeat(5, 1fr); background: var(--surface); border-top: 1px solid var(--line); }
+  display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--line); }
 .tabs button { position: relative; border: 0; background: none; color: var(--faint); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 12px; font-weight: 600; }
 .tabs button.active { color: var(--text); }
 .tabs button.active svg { stroke-width: 2.4; }
@@ -365,3 +365,6 @@ label.btn { cursor: pointer; }
 .lost-emergency { margin-top: 18px; font-size: 18px; font-weight: 600; }
 .lost-emergency a { color: #b42318; }
 .lost > .btn { flex: none; }
+
+.trip-seg { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); grid-auto-flow: column; }
+.trip-seg label span .n { display: inline; padding: 0; margin-left: 3px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }

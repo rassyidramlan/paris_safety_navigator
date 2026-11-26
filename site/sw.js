@@ -1,5 +1,5 @@
 /* Service worker: keeps the app shell and the last data.json available offline. */
-const SHELL = "pulse-shell-v13";
+const SHELL = "pulse-shell-v14";
 const DATA = "pulse-data";
 const MAP = "pulse-map";       // map tiles, fonts and icons (filled by "Save the map for offline" and by browsing)
 const MAP_MAX = 3000;          // entries; oldest are dropped beyond this

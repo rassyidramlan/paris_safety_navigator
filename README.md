@@ -54,7 +54,10 @@ On Windows PowerShell: `$env:PRIM_API_KEY="..."` before `python collect.py`.
 
 ## Trip tab
 
-The Trip tab shows the family itinerary day by day: you can tick off each stop, see a pre-trip checklist, and open any stop in Google Maps. Stops that have coordinates also appear in **Today**, where they get the same demonstration check as your own stops.
+The app has four tabs: Map, Feed, Trip and Help. Trip has three sections:
+- **Itinerary:** the family itinerary day by day. You can tick off each stop and open it in Google Maps. Stops with coordinates are checked for demonstrations, police orders and road closures at their time, and feed the alerts.
+- **Places:** always-watched places such as the hotel, your own extra stops, and the alerts and live-position switches. This was the Today tab.
+- **Prep:** the pre-trip checklist.
 
 The itinerary says where the family will be, hour by hour, so it is **never committed to this public repo or published with the site**. Each phone loads it in one of two ways:
 

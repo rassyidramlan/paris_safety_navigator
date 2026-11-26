@@ -289,7 +289,7 @@ function renderStatus() {
   } else {
     level = demos ? "amber" : "green";
     title = demos ? `${demos} demonstration notice${demos === 1 ? "" : "s"} in Paris` : "No demonstration notices";
-    sub = "Add your hotel in Today for alerts near you";
+    sub = "Add your hotel in Trip → Places for alerts near you";
   }
   const cityOrder = pe.find((e) => protestOrder(e) && e.status === "active" && !(e.stops || []).length);
   // Météo-France warnings for Paris itself: red turns the card red, orange amber, yellow is mentioned.
@@ -514,7 +514,7 @@ function renderToday() {
   for (let i = 0; i < 7; i++) days.push(dayKey(new Date(today.getTime() + i * 864e5)));
   if (!state.day || !days.includes(state.day)) state.day = days[0];
   $("#days").innerHTML = days.map((d, i) => `<button class="chip" data-day="${d}" aria-selected="${state.day === d}">${i === 0 ? "Today" : fDay.format(parisDate(d, "12:00"))}</button>`).join("");
-  $("#today-title").textContent = state.day === days[0] ? "Today" : fDay.format(parisDate(state.day, "12:00"));
+  $("#today-title").textContent = `Your own stops · ${state.day === days[0] ? "today" : fDay.format(parisDate(state.day, "12:00"))}`;
   const evs = events(), pe = parisEvents();
   const dayStart = parisDate(state.day, "00:00").getTime(), dayEnd = dayStart + 864e5;
   const onDay = (e) => e.status !== "ended" && (e.start ? +new Date(e.start) : 0) < dayEnd && (e.end ? +new Date(e.end) : Infinity) > dayStart;
@@ -525,9 +525,10 @@ function renderToday() {
   $("#today-banner").innerHTML = strikes.length ? `<div class="banner violet"><b>Strike notices${strikeLines.length ? `: ${esc(strikeLines.join(", "))}` : ""}</b><span>Expect reduced service. Check before travelling.</span></div>` : "";
   const pts = watchPoints();
   $("#places-list").innerHTML = pts.length ? pts.map((p) => placeRow(p, assess(p, evs))).join("") : '<p class="empty">Add your hotel first. It is checked all day, every day.</p>';
-  const stops = allStops().filter((s) => s.date === state.day).sort((a, b) => a.time.localeCompare(b.time));
+  // Itinerary stops live in the Itinerary section; this list is only the stops added on this phone.
+  const stops = state.stops.filter((s) => s.date === state.day).sort((a, b) => a.time.localeCompare(b.time));
   $("#stops-list").innerHTML = stops.length ? stops.map((s) => placeRow(s, assessAt(s, evs, parisDate(s.date, s.time)), s.time)).join("")
-    : '<p class="empty">Add where you plan to be and when. Each stop is checked for that time.</p>';
+    : '<p class="empty">None for this day. Add one if you go somewhere that isn\'t in the itinerary.</p>';
   const perm = "Notification" in window ? Notification.permission : "unsupported";
   $("#alerts-toggle").checked = perm === "granted" && store.get("alerts", false);
   $("#alerts-note").textContent = perm === "denied" ? "Blocked in browser settings" : perm === "unsupported" ? "Not supported in this browser" : "Notify me when a place or stop turns amber or red";
@@ -640,7 +641,7 @@ function saveChosen() {
 }
 function finishPick(pt) {
   state.picking = false; $("#pick-hint").hidden = true;
-  switchView("today"); $("#add").hidden = false; choose({ name: "", ...pt }); $("#add-name").focus();
+  openPlaces(); $("#add").hidden = false; choose({ name: "", ...pt }); $("#add-name").focus();
 }
 
 /* ---------- location ---------- */
@@ -668,7 +669,13 @@ async function checkAlerts() {
 }
 
 /* ---------- navigation and events ---------- */
+/** Trip → Places: always-watched places, your own stops, alerts. */
+function openPlaces() {
+  if (typeof trip !== "undefined") trip.tab = "places";
+  switchView("trip"); if (typeof renderTrip === "function") renderTrip();
+}
 function switchView(name) {
+  if (name === "today") return openPlaces();   // old links and buttons
   document.querySelectorAll(".view").forEach((v) => (v.hidden = v.id !== `view-${name}`));
   document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("active", b.dataset.view === name));
   if (name === "map" && map) setTimeout(() => map.resize(), 30);
