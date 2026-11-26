@@ -58,36 +58,30 @@
     </div>
   </section>
 
-  <!-- Trip -->
+  <!-- Trip: itinerary, places and stops, pre-trip checklist -->
   <section class="view" id="view-trip" aria-label="Trip" hidden>
     <div class="page">
       <header class="page-head">
         <h1>Trip</h1>
         <p class="page-sub" id="trip-sub"></p>
       </header>
+      <div class="seg trip-seg" id="trip-seg" role="radiogroup" aria-label="Show"></div>
       <div id="trip-body"></div>
-    </div>
-  </section>
-
-  <!-- Today -->
-  <section class="view" id="view-today" aria-label="Today" hidden>
-    <div class="page">
-      <header class="page-head">
-        <h1 id="today-title">Today</h1>
-        <p class="page-sub" id="today-sub"></p>
-      </header>
-      <div class="chips" id="days"></div>
-      <div id="today-banner"></div>
-      <h2>Always watching</h2>
-      <div class="card list" id="places-list"></div>
-      <h2>Your stops</h2>
-      <div class="card list" id="stops-list"></div>
-      <button class="btn btn-primary btn-wide" id="add-open">Add a place or stop</button>
-      <div class="card settings">
-        <label class="switch-row"><span><b>Alerts</b><small id="alerts-note">Notify me when a place or stop turns amber or red</small></span><input type="checkbox" id="alerts-toggle"></label>
-        <label class="switch-row"><span><b>Watch where I am</b><small>Use my live position as a place</small></span><input type="checkbox" id="gps-toggle"></label>
+      <div id="trip-places" hidden>
+        <h2>Always watching</h2>
+        <div class="card list" id="places-list"></div>
+        <button class="btn btn-primary btn-wide" id="add-open">Add a place or stop</button>
+        <div class="card settings">
+          <label class="switch-row"><span><b>Alerts</b><small id="alerts-note">Notify me when a place or stop turns amber or red</small></span><input type="checkbox" id="alerts-toggle"></label>
+          <label class="switch-row"><span><b>Watch where I am</b><small>Use my live position as a place</small></span><input type="checkbox" id="gps-toggle"></label>
+        </div>
+        <h2 id="today-title">Your own stops</h2>
+        <p class="page-sub" id="today-sub" style="margin:-4px 2px 8px"></p>
+        <div class="chips" id="days"></div>
+        <div id="today-banner"></div>
+        <div class="card list" id="stops-list"></div>
+        <p class="fine">Extra stops on top of the itinerary, like a restaurant or a friend's place. Places and stops are saved only on this phone.</p>
       </div>
-      <p class="fine">Places and stops are saved only on this phone.</p>
     </div>
   </section>
 
@@ -167,7 +161,6 @@
     <button data-view="map" class="active"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg><span>Map</span></button>
     <button data-view="feed"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Feed</span><i class="tab-badge" id="feed-badge" hidden></i></button>
     <button data-view="trip"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M8 12l2.5 2.5L16 9"/></svg><span>Trip</span></button>
-    <button data-view="today"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>Today</span></button>
     <button data-view="help"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="m5.6 5.6 3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/></svg><span>Help</span></button>
   </nav>
 

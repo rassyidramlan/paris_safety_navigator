@@ -340,18 +340,23 @@ function renderTrip() {
   if (trip.error) html += `<p class="error">${esc(trip.error)}</p>`;
   if (trip.changes && trip.changes.lines) html +=`<div class="banner blue"><b>Itinerary updated</b>${trip.changes.lines.map((l) => `<span>${esc(l)}</span>`).join("")}<button class="link-btn" id="trip-changes-ok">Got it</button></div>`;
   if (hotelUnwatched()) html += `<div class="banner amber"><b>Your hotel isn't being watched</b><span>Pin ${esc(d.trip.hotel.name)} so it's checked all day, every day.</span><button class="link-btn" id="trip-pin-hotel">Pin the hotel</button></div>`;
+  // Sections: Itinerary · Places · Prep (Prep only once there's an itinerary).
+  if (trip.tab === "prep" && !d) trip.tab = "plan";
+  const nPlaces = watchPoints().filter((p) => p.kind !== "me").length;
+  $("#trip-seg").innerHTML = [["plan", "Itinerary"], ["places", `Places <span class="n">${nPlaces}</span>`]]
+    .concat(d ? [["prep", `Prep <span class="n">${d.prep.filter((p) => trip.done[p.id]).length}/${d.prep.length}</span>`]] : [])
+    .map(([v, label]) => `<label><input type="radio" name="trip-tab" value="${v}"${trip.tab === v ? " checked" : ""}><span>${label}</span></label>`).join("");
+  $("#trip-places").hidden = trip.tab !== "places";
+  if (trip.tab === "places") { page.innerHTML = html; return; }
   if (!d) {
     html += `<div class="card"><h2 style="margin-top:4px">Add your itinerary</h2><p class="page-sub">Open the itinerary file, or paste a private link to it so changes reach this phone automatically.</p>${importControls()}</div>`;
   } else {
-    html += `<div class="seg trip-seg" role="radiogroup" aria-label="Show">
-      <label><input type="radio" name="trip-tab" value="plan"${trip.tab === "plan" ? " checked" : ""}><span>Itinerary</span></label>
-      <label><input type="radio" name="trip-tab" value="prep"${trip.tab === "prep" ? " checked" : ""}><span>Prep ${d.prep.filter((p) => trip.done[p.id]).length}/${d.prep.length}</span></label></div>`;
     html += trip.tab === "prep" ? renderPrep() : renderPlan();
     html += `<h2>Itinerary source</h2><div class="card">
       <p class="page-sub" style="margin:0 0 4px">${trip.link ? "Updates from your private link each time the app opens." : "Imported from a file. Add a link to get changes automatically."}${d.updated_at ? ` Version from ${esc(when(d.updated_at))}.` : ""}</p>
       ${importControls()}
       <button class="btn btn-wide" id="trip-clear">Remove itinerary from this phone</button></div>
-      <p class="fine">Stops with a location are also checked for demonstrations in Today. Ticks are saved only on this phone.</p>`;
+      <p class="fine">Stops with a location are checked for demonstrations, police orders and road closures at their time. Ticks are saved only on this phone.</p>`;
   }
   const left = page.querySelector("#trip-days")?.scrollLeft || trip.scroll || 0;
   page.innerHTML = html;
@@ -374,10 +379,10 @@ function importControls() {
 /* ---------- events ---------- */
 function bindTrip() {
   const page = $("#trip-body");
+  $("#trip-seg").addEventListener("change", (e) => { if (e.target.name === "trip-tab") { trip.tab = e.target.value; renderTrip(); } });
   page.addEventListener("change", async (e) => {
     const t = e.target;
     if (t.dataset.tick) { trip.done[t.dataset.tick] = t.checked; if (!t.checked) delete trip.done[t.dataset.tick]; store.set("trip-done", trip.done); return renderTrip(); }
-    if (t.name === "trip-tab") { trip.tab = t.value; return renderTrip(); }
     if (t.id === "trip-file" && t.files[0]) {
       try { saveTrip(JSON.parse(await t.files[0].text()), "file"); }
       catch (err) { trip.error = err instanceof SyntaxError ? "That file isn't an itinerary (it isn't valid JSON)." : err.message; }

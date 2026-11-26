@@ -82,7 +82,8 @@ function showSetupOffer(s) {
     }
     $("#setup").hidden = true; clearSetupFromUrl();
     if (s.trip) refreshTrip(true);
-    switchView(s.trip ? "trip" : "today"); render();
+    if (s.trip) { trip.tab = "plan"; switchView("trip"); } else openPlaces();
+    render();
   };
   $("#setup-skip").onclick = () => { $("#setup").hidden = true; clearSetupFromUrl(); };
 }
