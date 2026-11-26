@@ -11,7 +11,8 @@ Output (all times ISO 8601 UTC):
      "events": [{"id","kind","cat","title","text","lines","modes","stops":[{"n","lat","lon"}],
                  "lat","lon","pts","status","start","end","updated","sev","src","url","lt"}]}
 
-cat is one of: "demo" (operator cites a demonstration), "strike" (operator cites a strike /
+cat is one of: "order" (Préfecture de Police order: protest ban, security zone, police measures),
+"demo" (operator cites a demonstration), "strike" (operator cites a strike /
 social movement), "disruption" (unplanned
 transport problem), "works" (planned transport works), "road" (road works/closures).
 """
@@ -24,6 +25,7 @@ from pathlib import Path
 
 import news
 import paris_open_data
+import prefecture
 import prim_disruptions
 
 ROOT = Path(__file__).parent
@@ -166,6 +168,16 @@ def collect(now=None, api_key=None, locator=None, config=None):
         except Exception as exc:
             sources.append({"id": "news", "name": "French news (unconfirmed)", "ok": False,
                             "error": str(exc)[:200], "count": 0, "feed_updated": None})
+
+    # Préfecture de Police orders (protest bans, security zones). Official, published as PDFs.
+    try:
+        pev, note = prefecture.fetch(now)
+        events += pev
+        sources.append({"id": "prefecture", "name": "Préfecture de Police orders", "ok": True,
+                        "error": None, "count": len(pev), "feed_updated": None, "note": note})
+    except Exception as exc:
+        sources.append({"id": "prefecture", "name": "Préfecture de Police orders", "ok": False,
+                        "error": str(exc)[:200], "count": 0, "feed_updated": None})
 
     return {"generated_at": iso(now), "sources": sources, "events": events}
 

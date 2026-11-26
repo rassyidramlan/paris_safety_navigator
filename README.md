@@ -65,6 +65,12 @@ The itinerary's `trip.hotel` can carry `lat`, `lon` and `address`. If it does, t
 
 Stops get a "Road closed … Tell the driver" note when Paris Open Data lists a road closure within 150 m around that time. The note never changes the colour.
 
+### Préfecture de Police orders
+
+`prefecture.py` reads the Paris special bulletins of administrative orders ("recueils des actes administratifs spéciaux"), which are published as PDFs on prefectures-regions.gouv.fr. From each bulletin's contents list it keeps orders about demonstrations, security zones, police measures, weapons bans and police drones at protests. For each order it works out the days covered from the title, and finds the streets and stations its text names (using `data/paris_places.json`). Each bulletin is downloaded once, and `.cache/prefecture.json` is kept between runs. The listing pages are checked at most every 30 minutes.
+
+In the app, orders are a **Police orders** category. An order naming a place within 800 m of your place or stop turns it amber, never red. An order restricting protests across Paris with no place named turns the status card amber ("Police protest restrictions in Paris today"). Exact perimeters are only drawn on maps attached to the PDFs, so the app links to the official order. **Help → Sources** shows how many bulletins and orders were read.
+
 ### Itinerary on the map
 
 The map shows one day of the itinerary at a time: numbered pins in visiting order, joined by a dashed line, next to the hotel. During the trip it shows today; before the trip, use **‹ ›** to change day, or tap **Show this day on the map** in the Trip tab. Pins are coloured by the safety check for that stop's time. Ticked stops fade, and the next stop is outlined. Tap a pin for the time, any warning, notes, and **Directions**. The **Trip** chip hides or shows the layer. Only stops with `lat`/`lon` appear.
