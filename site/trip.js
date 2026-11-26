@@ -306,7 +306,7 @@ function renderPlan() {
   let html = `<div class="chips" id="trip-days">${days.map((d) => `<button class="chip" data-tday="${esc(d.id)}" aria-selected="${d.id === day.id}">${d.date === today ? "Today" : `Day ${esc(d.day)}`}<span class="n">${esc(shortDate(d.date))}</span></button>`).join("")}</div>`;
   const n = count(day), pct = day.stops.length ? Math.round((n / day.stops.length) * 100) : 0;
   html += `<div class="card tday">
-    <div class="tday-head"><div><h2>${esc(day.title)}</h2><p class="page-sub">${esc(fDay.format(parisDate(day.date, "12:00")))}${day.amended ? ' · <span class="tag">Amended</span>' : ""}</p></div></div>
+    <div class="tday-head"><div><h2>${esc(day.title)}</h2><p class="page-sub">${esc(fDay.format(parisDate(day.date, "12:00")))}${day.amended ? ' · <span class="tag">Amended</span>' : ""}</p>${typeof dayForecastHtml === "function" ? dayForecastHtml(day) : ""}</div></div>
     <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div>
     <p class="fine">${n} of ${day.stops.length} done</p>
     ${weatherOn(day.date).slice(0, 2).map((w) => `<button class="banner wx ${esc(w.tag)}" data-ev="${esc(w.id)}"><b>${esc(w.title)}</b><span>${esc(span(w.start, w.end))} · tap for advice</span></button>`).join("")}
