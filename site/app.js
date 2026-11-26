@@ -658,14 +658,48 @@ async function checkAlerts() {
   for (const p of watchPoints()) { const a = assess(p, evs); now[p.id] = a.level; if (LEVELS.indexOf(a.level) > LEVELS.indexOf(state.lastLevels[p.id] || "green")) worse.push({ name: p.name, a }); }
   for (const s of upcomingStops()) { const a = assessAt(s, evs, s.at); const k = `stop-${s.id}`; now[k] = a.level; if (LEVELS.indexOf(a.level) > LEVELS.indexOf(state.lastLevels[k] || "green")) worse.push({ name: `${s.name} at ${s.time}`, a }); }
   state.lastLevels = now; store.set("lastLevels", now);
+  if (!worse.length) return;
+  // In the app: a banner at the top, whatever the notification settings (iPhones only allow
+  // notifications for the Home Screen app). Red ones stay until dismissed.
+  worse.sort((x, y) => LEVELS.indexOf(y.a.level) - LEVELS.indexOf(x.a.level));
+  const top = worse[0];
+  showToast(top.a.level, alertTitle(top), top.a.why + (worse.length > 1 ? ` · and ${worse.length - 1} more` : ""), top.a.cause || null);
   if (worse.some((w) => w.a.level === "red")) navigator.vibrate?.([250, 100, 250]);
-  if (!worse.length || !store.get("alerts", false) || !("Notification" in window) || Notification.permission !== "granted") return;
+  for (const w of worse) await notify(alertTitle(w), w.a.why, `pulse-${w.name}`);
+}
+const alertTitle = ({ name, a }) => (a.level === "red" ? `Demonstration near ${name}` : `Watch out near ${name}`);
+
+/** A system notification, when alerts are on and allowed. */
+async function notify(title, body, tag) {
+  if (!store.get("alerts", false) || !("Notification" in window) || Notification.permission !== "granted") return false;
   const reg = await navigator.serviceWorker?.getRegistration();
-  for (const { name, a } of worse) {
-    const title = a.level === "red" ? `Demonstration near ${name}` : `Watch out near ${name}`;
-    const opts = { body: a.why, tag: `pulse-${name}`, renotify: true, icon: "icons/icon-192.png" };
-    try { reg ? reg.showNotification(title, opts) : new Notification(title, opts); } catch { /* ignore */ }
-  }
+  const opts = { body, tag, renotify: true, icon: "icons/icon-192.png" };
+  try { reg ? await reg.showNotification(title, opts) : new Notification(title, opts); return true; } catch { return false; }
+}
+
+let toastTimer = null;
+function showToast(level, title, body, cause) {
+  const t = $("#toast"); if (!t) return;
+  t.dataset.level = level; $("#toast-title").textContent = title; $("#toast-body").textContent = body || "";
+  t._cause = cause; t.hidden = false;
+  clearTimeout(toastTimer);
+  if (level !== "red") toastTimer = setTimeout(() => (t.hidden = true), 15000);
+}
+
+/** "Send a test alert": shows exactly what a real one looks like on this phone. */
+async function testAlert() {
+  const note = $("#alerts-note");
+  if ("Notification" in window && Notification.permission === "default") await Notification.requestPermission();
+  if ("Notification" in window && Notification.permission === "granted") store.set("alerts", true);   // testing means wanting them
+  const title = "Test alert: Demonstration near your hotel", body = "This is only a test. Real alerts look like this.";
+  showToast("red", title, body, null);
+  navigator.vibrate?.([250, 100, 250]);
+  const sent = await notify(title, body, "pulse-test");
+  renderToday();
+  note.textContent = sent ? "Test sent. Alerts are on for this phone."
+    : !("Notification" in window) ? "This browser can't show notifications. On iPhone, add the app to the Home Screen first. The banner above still works."
+    : Notification.permission === "denied" ? "Notifications are blocked in this phone's settings. The banner above still works."
+    : "Turn Alerts on to also get a phone notification. The banner above still works.";
 }
 
 /* ---------- navigation and events ---------- */
@@ -732,6 +766,8 @@ function bind() {
     if (e.target.checked && "Notification" in window && Notification.permission === "default") await Notification.requestPermission();
     store.set("alerts", e.target.checked && "Notification" in window && Notification.permission === "granted"); renderToday();
   };
+  $("#alerts-test").onclick = testAlert;
+  $("#toast").onclick = (e) => { const t = $("#toast"); t.hidden = true; if (e.target.id !== "toast-x" && t._cause) showDetail(t._cause); };
   $("#gps-toggle").onchange = (e) => {
     state.gps = e.target.checked; store.set("gps", state.gps);
     if (state.gps) startGps(); else { if (watchId != null) navigator.geolocation.clearWatch(watchId); state.me = null; }

@@ -73,6 +73,7 @@
         <button class="btn btn-primary btn-wide" id="add-open">Add a place or stop</button>
         <div class="card settings">
           <label class="switch-row"><span><b>Alerts</b><small id="alerts-note">Notify me when a place or stop turns amber or red</small></span><input type="checkbox" id="alerts-toggle"></label>
+          <button class="link-btn alert-test" id="alerts-test">Send a test alert</button>
           <label class="switch-row"><span><b>Watch where I am</b><small>Use my live position as a place</small></span><input type="checkbox" id="gps-toggle"></label>
         </div>
         <h2 id="today-title">Your own stops</h2>
@@ -219,6 +220,8 @@
     <div class="lost-body" id="lost-body"></div>
     <button class="btn" id="lost-close">Close</button>
   </div>
+
+  <button class="toast" id="toast" hidden aria-live="assertive"><span class="toast-dot"></span><span class="toast-text"><b id="toast-title"></b><small id="toast-body"></small></span><span class="toast-x" id="toast-x" aria-label="Dismiss">×</span></button>
 
   <div class="taxi" id="taxi" hidden>
     <p id="taxi-text"></p>
