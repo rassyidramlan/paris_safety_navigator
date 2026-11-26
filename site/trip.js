@@ -121,6 +121,95 @@ function tripHotelText() {
 /** True when nothing watches the hotel yet: no location in the itinerary and no saved place. */
 const hotelUnwatched = () => !!(trip.data && trip.data.trip.hotel && !tripHotel() && !state.places.length);
 
+/* ---------- on the map: one day's stops, numbered, with the order as a dashed line ---------- */
+/** The day the map shows: today during the trip, otherwise the day picked in the Trip tab. */
+function mapDay() {
+  if (!trip.data) return null;
+  const days = trip.data.days, today = dayKey(new Date());
+  return days.find((d) => d.id === trip.mapDay) || days.find((d) => d.date === today) || days.find((d) => d.id === trip.day) || days[0];
+}
+const located = (day) => (day ? day.stops.filter((s) => s.lat != null) : []);
+
+function tripLine() {
+  const pts = located(mapDay());
+  return { type: "FeatureCollection", features: pts.length > 1
+    ? [{ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: pts.map((s) => [s.lon, s.lat]) } }] : [] };
+}
+
+/** The first stop today that isn't ticked and hasn't long passed. */
+function nextStopId(day) {
+  if (!day || day.date !== dayKey(new Date())) return null;
+  const now = Date.now();
+  const s = located(day).find((x) => !trip.done[x.id] && parisDate(day.date, x.end || x.time).getTime() >= now - 30 * 60e3);
+  return s ? s.id : null;
+}
+
+function stopPopup(s, day, a) {
+  const dir = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`;
+  return `<div class="tpop"><p class="tpop-time">${esc(fShort.format(parisDate(day.date, "12:00")))} · ${esc(s.time)}${s.end ? `–${esc(s.end)}` : ""}</p>
+    <p class="tpop-title">${esc(s.title)}</p>
+    ${a && a.level !== "green" ? `<p class="place-why ${a.level}"><span class="dot ${a.level}"></span> ${esc(a.why)}</p>` : '<p class="place-why green">Nothing reported near here</p>'}
+    ${a && a.road ? `<p class="place-why road">${esc(a.road)}</p>` : ""}
+    ${s.notes ? `<p class="tpop-note">${esc(s.notes)}</p>` : ""}
+    <a class="btn btn-wide" href="${esc(dir)}" target="_blank" rel="noopener">Directions</a></div>`;
+}
+
+function tripMarkers(evs) {
+  if (!window.maplibregl || !map) return [];
+  const day = mapDay(), next = nextStopId(day);
+  // Markers are rebuilt on every refresh; keep the open popup open across it.
+  const wasOpen = (trip.popups || []).find((x) => x.pop.isOpen());
+  (trip.popups || []).forEach((x) => x.pop.remove()); trip.popups = [];
+  return located(day).map((s, i) => {
+    const a = state.data ? assessAt(s, evs, parisDate(day.date, s.time)) : null;
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = `tpin ${a ? a.level : "green"}${trip.done[s.id] ? " done" : ""}${s.id === next ? " next" : ""}`;
+    el.setAttribute("aria-label", `${i + 1}. ${s.time} ${s.title}`);
+    el.innerHTML = `<b>${i + 1}</b><span>${esc(s.time)}</span>`;
+    const pop = new maplibregl.Popup({ offset: 16, maxWidth: "270px", closeButton: true }).setHTML(stopPopup(s, day, a));
+    // Anchor the numbered circle, not the middle of the label, on the stop.
+    const marker = new maplibregl.Marker({ element: el, anchor: "left", offset: [-14, 0] }).setLngLat([s.lon, s.lat]).addTo(map);
+    // Open our own popup and keep the tap from also opening an event underneath.
+    el.addEventListener("click", (e) => { e.stopPropagation(); if (pop.isOpen()) return pop.remove();
+      (trip.popups || []).forEach((x) => x.pop.remove());
+      pop.setLngLat([s.lon, s.lat]).addTo(map);
+      // Move the stop down the screen so the card above it clears the status card and chips.
+      map.easeTo({ center: [s.lon, s.lat], offset: [0, 110], duration: 350 });
+    });
+    trip.popups.push({ id: s.id, pop });
+    if (wasOpen && wasOpen.id === s.id) pop.setLngLat([s.lon, s.lat]).addTo(map);
+    return marker;
+  });
+}
+
+function renderDaySwitch() {
+  const box = $("#dayswitch"); if (!box) return;
+  const day = mapDay();
+  box.hidden = !(day && state.layers.trip);
+  if (box.hidden) return;
+  const days = trip.data.days, i = days.indexOf(day), today = dayKey(new Date());
+  box.innerHTML = `<button class="ds-arrow" data-dstep="-1" aria-label="Previous day"${i === 0 ? " disabled" : ""}>‹</button>
+    <button class="ds-label" data-dfit="1">${day.date === today ? "Today" : `Day ${esc(day.day)}`} · ${esc(shortDate(day.date))}<span>${located(day).length} stops</span></button>
+    <button class="ds-arrow" data-dstep="1" aria-label="Next day"${i === days.length - 1 ? " disabled" : ""}>›</button>`;
+}
+
+/** Fit the map to a day's stops and the hotel. */
+function fitDay() {
+  const pts = located(mapDay()).slice();
+  const word = ((trip.data.trip.hotel || {}).name || "").split(" ")[0].toLowerCase();
+  const hotel = tripHotel() || (word ? state.places.find((p) => p.name.toLowerCase().includes(word)) : null);
+  if (hotel) pts.push(hotel);
+  // Leave room for the status card, layer chips and day switcher above, the list below, and pin labels to the right.
+  if (pts.length) fitTo(pts, { top: 250, bottom: 320, left: 50, right: 110 });
+}
+
+function showDayOnMap(id) {
+  trip.mapDay = id; state.layers.trip = true; store.set("layers2", state.layers);
+  switchView("map"); renderLayerChips(); renderMap();
+  setTimeout(fitDay, 60);
+}
+
 /* ---------- rendering ---------- */
 const fShort = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
 const shortDate = (k) => fShort.format(parisDate(k, "12:00"));
@@ -175,6 +264,7 @@ function renderPlan() {
     <p class="fine">${n} of ${day.stops.length} done</p>
     ${day.constraints.length ? `<div class="banner amber"><b>Keep in mind</b><span>${esc(day.constraints.join(" · "))}</span></div>` : ""}
     <div class="list">${day.stops.map((s) => stopRow(s, day, evs)).join("") || '<p class="empty">Nothing planned.</p>'}</div>
+    ${located(day).length ? `<button class="btn btn-wide" data-showday="${esc(day.id)}">Show this day on the map</button>` : ""}
   </div>`;
   return html;
 }
@@ -245,6 +335,7 @@ function bindTrip() {
   });
   page.addEventListener("click", (e) => {
     const d = e.target.closest("[data-tday]"); if (d) { trip.day = d.dataset.tday; return renderTrip(); }
+    const sd = e.target.closest("[data-showday]"); if (sd) return showDayOnMap(sd.dataset.showday);
     if (e.target.id === "trip-pin-hotel") {
       openAdd(); document.querySelector('input[name="when"][value="always"]').checked = true; $("#add-time").hidden = true;
       const q = trip.data.trip.hotel.maps_query || trip.data.trip.hotel.name;
@@ -266,6 +357,15 @@ function bindTrip() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  bindTrip(); renderTrip(); refreshTrip();
+  bindTrip();
+  $("#dayswitch").addEventListener("click", (e) => {
+    const step = e.target.closest("[data-dstep]");
+    if (step) {
+      const days = trip.data.days, i = days.indexOf(mapDay()) + Number(step.dataset.dstep);
+      if (days[i]) { trip.mapDay = days[i].id; renderMap(); fitDay(); }
+      return;
+    }
+    if (e.target.closest("[data-dfit]")) fitDay();
+  }); renderTrip(); refreshTrip();
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refreshTrip(); });
 });

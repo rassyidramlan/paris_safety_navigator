@@ -43,7 +43,7 @@ const state = {
   places: store.get("places", []),
   stops: store.get("stops", []),
   gps: store.get("gps", false), me: null,
-  layers: { demo: true, strike: true, news: true, disruption: true, works: false, road: false, ...store.get("layers2", {}) },
+  layers: { demo: true, strike: true, news: true, disruption: true, works: false, road: false, trip: true, ...store.get("layers2", {}) },
   feedFilter: "all", feedQuery: "", wide: false,
   day: null, lastLevels: store.get("lastLevels", {}), original: {},
   picking: false, chosen: null,
@@ -318,6 +318,10 @@ function addLayers() {
       17, ["*", 1.6, ["min", 26, ["+", 9, ["*", 3, ["get", "reports"]]]]]],
     "circle-color": CAT.news.color, "circle-opacity": ["case", ["get", "soon"], 0.18, 0.08],
     "circle-stroke-color": CAT.news.color, "circle-stroke-width": 1.5, "circle-stroke-opacity": ["case", ["get", "soon"], 0.9, 0.45] } });
+  // Itinerary: the order of the day's stops, as a dashed line under the stop pins (trip.js).
+  map.addSource("trip-line", { type: "geojson", data: typeof tripLine === "function" ? tripLine() : { type: "FeatureCollection", features: [] } });
+  map.addLayer({ id: "trip-line", type: "line", source: "trip-line", layout: { "line-cap": "round", "line-join": "round" },
+    paint: { "line-color": "#2f5bea", "line-width": 3, "line-opacity": 0.7, "line-dasharray": [1.5, 1.5] } });
   map.addLayer({ id: "dots", type: "circle", source: "events", paint: {
     "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 3, 14, 6, 17, 9],
     "circle-color": ["match", ["get", "cat"], "demo", CAT.demo.color, "strike", CAT.strike.color, "news", CAT.news.color, "disruption", CAT.disruption.color, CAT.works.color],
@@ -332,20 +336,30 @@ function renderMap() {
   for (const p of watchPoints()) {
     const el = document.createElement("div");
     if (p.kind === "me") el.className = "me";
-    else { const lv = assess(p, evs).level; el.className = `pin ${lv}`; el.innerHTML = `<i>${esc(p.name.slice(0, 1).toUpperCase())}</i>${esc(p.name)}`; }
+    else {
+      const lv = assess(p, evs).level; el.className = `pin ${lv}`;
+      const icon = p.id === "trip-hotel" ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19V6M3 14h18v5M21 14v-3a3 3 0 0 0-3-3h-7v6"/><circle cx="7" cy="10.5" r="2"/></svg>' : esc(p.name.slice(0, 1).toUpperCase());
+      el.innerHTML = `<i>${icon}</i>${esc(p.name)}`;
+    }
     markers.push(new maplibregl.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(map));
   }
+  const on = state.layers.trip && typeof tripLine === "function";
+  if (map.getSource("trip-line")) map.getSource("trip-line").setData(on ? tripLine() : { type: "FeatureCollection", features: [] });
+  if (on) markers.push(...tripMarkers(evs));
+  if (typeof renderDaySwitch === "function") renderDaySwitch();
 }
 function renderLayerChips() {
   const counts = {}; for (const e of parisEvents()) counts[e.cat] = (counts[e.cat] || 0) + 1;
-  $("#layers").innerHTML = ["demo", "news", "strike", "disruption", "works", "road"].map((k) =>
+  const tripChip = typeof trip !== "undefined" && trip.data
+    ? `<button class="chip" data-layer="trip" aria-pressed="${!!state.layers.trip}"><span class="swatch" style="background:#2f5bea"></span>Trip</button>` : "";
+  $("#layers").innerHTML = tripChip + ["demo", "news", "strike", "disruption", "works", "road"].map((k) =>
     `<button class="chip" data-layer="${k}" aria-pressed="${!!state.layers[k]}"><span class="swatch" style="background:${CAT[k].color}"></span>${CAT[k].plural}${counts[k] ? ` <span class="n">${counts[k]}</span>` : ""}</button>`).join("");
 }
-function fitTo(points) {
+function fitTo(points, padding = { top: 170, bottom: 300, left: 40, right: 40 }) {
   if (!map || !points.length) return;
   if (points.length === 1) return map.flyTo({ center: [points[0].lon, points[0].lat], zoom: 15 });
   const b = new maplibregl.LngLatBounds(); points.forEach((p) => b.extend([p.lon, p.lat]));
-  map.fitBounds(b, { padding: { top: 170, bottom: 300, left: 40, right: 40 }, maxZoom: 16 });
+  map.fitBounds(b, { padding, maxZoom: 16 });
 }
 
 /* ---------- bottom sheet ---------- */

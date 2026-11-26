@@ -274,3 +274,31 @@ label.btn { cursor: pointer; }
 .banner.amber .link-btn { margin: 6px 0 0; font-weight: 600; font-size: 14px; color: inherit; }
 .setup-list { margin: 0 0 10px; padding-left: 20px; line-height: 1.5; }
 #setup .btn-wide + .btn-wide { margin-top: 8px; }
+
+/* ---------- Trip on the map ---------- */
+.pin i svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dayswitch { display: inline-flex; align-items: stretch; margin-top: 8px; background: var(--surface); border-radius: 999px; box-shadow: var(--shadow); overflow: hidden; }
+.dayswitch button { border: 0; background: none; color: var(--text); font: inherit; cursor: pointer; }
+.ds-arrow { width: 40px; font-size: 22px; line-height: 1; font-weight: 500; }
+.ds-arrow:disabled { color: var(--faint); cursor: default; }
+.ds-label { padding: 7px 6px; font-size: 14px; font-weight: 600; display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
+.ds-label span { font-size: 11px; font-weight: 500; color: var(--muted); }
+.tpin { display: flex; align-items: center; gap: 5px; padding: 3px 9px 3px 3px; border: 0; border-radius: 999px; background: var(--surface); color: var(--text);
+  box-shadow: var(--shadow); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.tpin b { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: #2f5bea; color: #fff; font-size: 12px; }
+.tpin.amber b { background: var(--amber); } .tpin.red b { background: var(--red); }
+.tpin.done { opacity: .5; } .tpin.done b { background: var(--faint); }
+.tpin.next { outline: 3px solid #2f5bea; outline-offset: 1px; }
+.maplibregl-popup-content { background: var(--surface); color: var(--text); border-radius: 14px; padding: 12px 14px; box-shadow: var(--shadow); }
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: var(--surface); }
+.maplibregl-popup-anchor-top .maplibregl-popup-tip { border-bottom-color: var(--surface); }
+.maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: var(--surface); }
+.maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--surface); }
+.maplibregl-popup-close-button { color: var(--muted); font-size: 20px; padding: 2px 8px; }
+.tpop p { margin: 0; }
+.tpop-time { font-size: 12px; color: var(--muted); font-weight: 600; }
+.tpop-title { font-weight: 700; font-size: 15px; margin: 2px 18px 6px 0 !important; line-height: 1.3; }
+.tpop .place-why { font-size: 13px; margin-top: 2px; }
+.tpop-note { font-size: 13px; background: var(--surface-2); border-radius: 8px; padding: 6px 8px; margin-top: 6px !important; }
+.tpop .btn { margin-top: 10px; text-decoration: none; text-align: center; display: block; }
+.tday > .btn-wide { margin-top: 12px; }
