@@ -318,3 +318,8 @@ label.btn { cursor: pointer; }
 .nc-note { font-size: 13px; color: var(--muted); margin-top: 4px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nc-follow { font-size: 13px; color: var(--muted); margin-top: 6px !important; border-top: 1px solid var(--line); padding-top: 6px; }
 @media (prefers-color-scheme: dark) { .nc-label { color: #8ea8ff; } }
+/* ---------- Préfecture orders ---------- */
+.tile.order { background: rgba(232, 89, 12, .14); color: #c2410c; }
+.pill.order { background: rgba(232, 89, 12, .14); color: #b23c0a; }
+.src-note { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+@media (prefers-color-scheme: dark) { .tile.order, .pill.order { color: #ff9a5c; background: rgba(255, 140, 70, .16); } }
