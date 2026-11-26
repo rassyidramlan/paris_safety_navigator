@@ -347,3 +347,5 @@ label.btn { cursor: pointer; }
 .tday-wx span { display: flex; align-items: center; gap: 6px; }
 .tday-wx b { color: var(--text); font-weight: 600; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tday-wx svg { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.place-why.pick { color: #6741d9; margin-top: 3px; }
+@media (prefers-color-scheme: dark) { .place-why.pick { color: #b197fc; } }

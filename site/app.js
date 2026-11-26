@@ -65,7 +65,7 @@ const state = {
   places: store.get("places", []),
   stops: store.get("stops", []),
   gps: store.get("gps", false), me: null,
-  layers: { demo: true, strike: true, news: true, disruption: true, works: false, road: false, trip: true, order: true, ...store.get("layers2", {}) },
+  layers: { demo: true, strike: true, news: true, disruption: true, works: false, road: false, trip: true, order: true, pick: false, ...store.get("layers2", {}) },
   feedFilter: "all", feedQuery: "", wide: false,
   day: null, lastLevels: store.get("lastLevels", {}), original: {},
   picking: false, chosen: null,
@@ -199,7 +199,7 @@ function assess(point, events) {
     else if (newsCounts(ev) && isNearTerm(ev) && near.d <= NEWS_NEAR) { l = "amber"; r = 12 - near.d / 1e3; }
     if (l && r > rank) { rank = r; best = { level: l, why: describe(ev, near), cause: ev }; }
   }
-  return { ...best, road: roadClosure(point, events) };
+  return { ...best, road: roadClosure(point, events), pick: typeof hotspotNote === "function" ? hotspotNote(point) : "" };
 }
 /** Status for a stop at a given time: checks one hour before to two hours after. */
 function assessAt(point, events, at) {
@@ -218,7 +218,7 @@ function assessAt(point, events, at) {
     else if (newsCounts(ev) && near.d <= NEWS_NEAR) { l = "amber"; r = 12 - near.d / 1e3; }
     if (l && r > rank) { rank = r; best = { level: l, why: describe(ev, near, true), cause: ev }; }
   }
-  return { ...best, road: roadClosure(point, events, at.getTime() - 3600e3, at.getTime() + 3 * 3600e3) };
+  return { ...best, road: roadClosure(point, events, at.getTime() - 3600e3, at.getTime() + 3 * 3600e3), pick: typeof hotspotNote === "function" ? hotspotNote(point) : "" };
 }
 /** Closed roads near a place, for the van driver. A note only: closures never change the colour. */
 const ROAD_NEAR = 150;   // metres
@@ -320,7 +320,9 @@ function initMap() {
   map.on("click", (e) => {
     if (state.picking) return finishPick({ lat: e.lngLat.lat, lon: e.lngLat.lng });
     const hit = map.queryRenderedFeatures(e.point, { layers: ["dots", "roads"].filter((l) => map.getLayer(l)) })[0];
-    if (hit) { const ev = events().find((x) => x.id === hit.properties.id); if (ev) showDetail(ev); }
+    if (hit) { const ev = events().find((x) => x.id === hit.properties.id); if (ev) showDetail(ev); return; }
+    const area = state.layers.pick && map.getLayer("hotspots-fill") && map.queryRenderedFeatures(e.point, { layers: ["hotspots-fill"] })[0];
+    if (area) hotspotPopup(area.properties.id, e.lngLat);
   });
   for (const l of ["dots", "roads"]) {
     map.on("mouseenter", l, () => (map.getCanvas().style.cursor = "pointer"));
@@ -343,6 +345,7 @@ function addLayers() {
   const g = geo();
   map.addSource("events", { type: "geojson", data: g.pts });
   map.addSource("roadlines", { type: "geojson", data: g.lines });
+  if (typeof addHotspotLayers === "function") addHotspotLayers();
   map.addLayer({ id: "roads", type: "line", source: "roadlines", paint: { "line-color": CAT.road.color, "line-width": 4, "line-opacity": 0.75 } });
   map.addLayer({ id: "glow", type: "circle", source: "events", filter: ["==", ["get", "cat"], "demo"], paint: {
     "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 10, 13, 26, 16, 70],
@@ -369,6 +372,7 @@ function renderMap() {
   const g = geo();
   if (map.getSource("events")) { map.getSource("events").setData(g.pts); map.getSource("roadlines").setData(g.lines); }
   markers.forEach((m) => m.remove()); markers = [];
+  if (typeof showHotspots === "function") showHotspots();
   const evs = events();
   for (const p of watchPoints()) {
     const el = document.createElement("div");
@@ -390,7 +394,8 @@ function renderLayerChips() {
   const tripChip = typeof trip !== "undefined" && trip.data
     ? `<button class="chip" data-layer="trip" aria-pressed="${!!state.layers.trip}"><span class="swatch" style="background:#2f5bea"></span>Trip</button>` : "";
   $("#layers").innerHTML = tripChip + ["demo", "order", "news", "strike", "disruption", "works", "road"].map((k) =>
-    `<button class="chip" data-layer="${k}" aria-pressed="${!!state.layers[k]}"><span class="swatch" style="background:${CAT[k].color}"></span>${CAT[k].plural}${counts[k] ? ` <span class="n">${counts[k]}</span>` : ""}</button>`).join("");
+    `<button class="chip" data-layer="${k}" aria-pressed="${!!state.layers[k]}"><span class="swatch" style="background:${CAT[k].color}"></span>${CAT[k].plural}${counts[k] ? ` <span class="n">${counts[k]}</span>` : ""}</button>`).join("")
+    + (typeof HOTSPOTS !== "undefined" ? `<button class="chip" data-layer="pick" aria-pressed="${!!state.layers.pick}"><span class="swatch" style="background:${PICK_COLOR}"></span>Pickpockets</button>` : "");
 }
 function fitTo(points, padding = { top: 170, bottom: 300, left: 40, right: 40 }) {
   if (!map || !points.length) return;
@@ -464,7 +469,7 @@ function newsRow(ev) {
 }
 function placeRow(p, a, time = "") {
   return `<div class="place" data-place="${esc(p.id)}">${time ? `<span class="place-time">${esc(time)}</span>` : `<span class="dot ${a.level}"></span>`}
-    <div><div class="place-name">${time ? `<span class="dot ${a.level}"></span> ` : ""}${esc(p.name)}</div><div class="place-why ${a.level}">${esc(a.why)}</div>${a.road ? `<div class="place-why road">${esc(a.road)}</div>` : ""}</div>
+    <div><div class="place-name">${time ? `<span class="dot ${a.level}"></span> ` : ""}${esc(p.name)}</div><div class="place-why ${a.level}">${esc(a.why)}</div>${a.road ? `<div class="place-why road">${esc(a.road)}</div>` : ""}${a.pick ? `<div class="place-why pick">${esc(a.pick)}</div>` : ""}</div>
     ${p.kind === "me" ? "" : p.kind === "trip" ? '<span class="trip-tag" title="From your itinerary">Trip</span>' : `<button class="icon-btn" data-remove="${esc(p.id)}" aria-label="Remove ${esc(p.name)}"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>`}</div>`;
 }
 const skeleton = () => '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';

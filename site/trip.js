@@ -163,6 +163,7 @@ function nextCardHtml() {
     </div>
     ${a && a.level !== "green" ? `<p class="place-why ${a.level}"><span class="dot ${a.level}"></span> ${esc(a.why)}</p>` : ""}
     ${a && a.road ? `<p class="place-why road">${esc(a.road)}</p>` : ""}
+    ${a && a.pick ? `<p class="place-why pick">${esc(a.pick)}</p>` : ""}
     ${main.notes ? `<p class="nc-note">${esc(main.notes)}</p>` : ""}
     ${follow ? `<p class="nc-follow">Then ${esc(follow.time)} ${esc(follow.title)} · ${esc(fmtIn(n.at(follow) - now))}</p>` : ""}
   </div>`;
@@ -197,6 +198,7 @@ function stopPopup(s, day, a) {
     <p class="tpop-title">${esc(s.title)}</p>
     ${a && a.level !== "green" ? `<p class="place-why ${a.level}"><span class="dot ${a.level}"></span> ${esc(a.why)}</p>` : '<p class="place-why green">Nothing reported near here</p>'}
     ${a && a.road ? `<p class="place-why road">${esc(a.road)}</p>` : ""}
+    ${a && a.pick ? `<p class="place-why pick">${esc(a.pick)}</p>` : ""}
     ${s.notes ? `<p class="tpop-note">${esc(s.notes)}</p>` : ""}
     <a class="btn btn-wide" href="${esc(dir)}" target="_blank" rel="noopener">Directions</a></div>`;
 }
@@ -293,6 +295,7 @@ function stopRow(s, day, evs) {
       ${s.notes ? `<div class="tstop-note">${esc(s.notes)}</div>` : ""}
       ${safety && safety.level !== "green" ? `<div class="place-why ${safety.level}"><span class="dot ${safety.level}"></span> ${esc(safety.why)}</div>` : ""}
       ${safety && safety.road ? `<div class="place-why road">${esc(safety.road)}</div>` : ""}
+      ${safety && safety.pick ? `<div class="place-why pick">${esc(safety.pick)}</div>` : ""}
     </div>
     ${url ? `<a class="icon-btn" href="${esc(url)}" target="_blank" rel="noopener" aria-label="Open ${esc(s.title)} in Google Maps"><svg viewBox="0 0 24 24">${TYPE_ICON.visit}</svg></a>` : `<span class="tstop-type" aria-hidden="true"><svg viewBox="0 0 24 24">${TYPE_ICON[s.type] || TYPE_ICON.visit}</svg></span>`}
   </div>`;
